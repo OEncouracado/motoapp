@@ -1,26 +1,41 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+// middleware.ts
+
+import { supabase } from "@/context/supabase";
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
+import { NextRequest, NextResponse } from "next/server"
+
 
 export async function middleware(req: NextRequest) {
-  const token = req.cookies.get("sb-access-token")?.value
+  const res = NextResponse.next()
+  console.log('supabase :>> ', supabase);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  
+  console.log("🧠 Sessão no middleware:", session)
 
-  const isAuthPage = req.nextUrl.pathname.startsWith("/login")
 
-  if (!token && !isAuthPage) {
-    return NextResponse.redirect(new URL("/login", req.url))
+  const isAuth = !!session
+  const isLoginPage = req.nextUrl.pathname === '/login'
+
+  if (!isAuth && !isLoginPage) {
+    const redirectUrl = req.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    return NextResponse.redirect(redirectUrl)
   }
 
-  if (token && isAuthPage) {
-    return NextResponse.redirect(new URL("/dashboard", req.url))
+  console.log("🔒 Middleware executado:", req.nextUrl.pathname)
+
+  if (isAuth && isLoginPage) {
+    const redirectUrl = req.nextUrl.clone()
+    redirectUrl.pathname = '/home' // ou outra rota padrão
+    return NextResponse.redirect(redirectUrl)
   }
 
-  return NextResponse.next()
+  return res
 }
-
 export const config = {
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: ["/((?!api|_next|favicon.ico|auth/callback).*)"], // protege todas as rotas, exceto públicas
 }
-// This middleware checks if the user is authenticated by looking for a cookie named "sb-access-token".
-// If the user is not authenticated and tries to access a protected route (anything other than "/login"), they will be redirected to the login page.
-// If the user is authenticated and tries to access the login page, they will be redirected to the dashboard.
-// The matcher specifies which routes the middleware should apply to, in this case, all routes under "/dashboard" and the "/login" route.
+
+

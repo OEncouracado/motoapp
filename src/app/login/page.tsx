@@ -1,22 +1,19 @@
 "use client"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { supabase } from "@/context/supabase"
+import { useApp } from "@/context/AppContext"
 
 export default function Login() {
+  const { logIn, isLoggedIn } = useApp()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const router = useRouter()
+
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      alert(error.message)
-    } else {
-      router.push("/dashboard")
-    }
+    await logIn(email, password);
+  };
+  if (isLoggedIn()) {
+    window.location.href = "/home"; // Redireciona para a página inicial após o login
   }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark-100">
       <div className="p-6 rounded shadow-md w-full max-w-sm rounded" style={{ backgroundColor: "#1a1a1a"}}>
