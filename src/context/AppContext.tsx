@@ -63,21 +63,28 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   // 🔐 Login
   const logIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password, options:{ redirectTo: `${location.origin}/auth/callback`}, })
-    if (error) {
-      alert(error.message)
-    } else {
-      await carregarSessao() // força o carregamento após login
-      window.location.href = "/home"
-    }
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (error) {
+    alert(error.message)
+    return
   }
+
+  // ✅ Agora redireciona manualmente para o callback
+  window.location.href = "/auth/callback"
+}
+
 
   // 🚪 Logout
   const logOut = async () => {
     await supabase.auth.signOut()
-    setUsuario(null)
-    setEmpresa(null)
-    window.location.href = "/login"
+    window.location.href = "/auth/callback"
+    // setUsuario(null)
+    // setEmpresa(null)
+    
   }
 
   const isLoggedIn = () => !!usuario

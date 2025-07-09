@@ -1,5 +1,4 @@
-"use client";
-// import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
@@ -16,24 +15,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// export const metadata: Metadata = {
-//   title: "MotoApp",
-//   description: "Aplicativo de gestão de oficinas mecânicas de motos",
-// };
+export const metadata: Metadata = {
+  title: "MotoApp",
+  description: "Aplicativo de gestão de oficinas mecânicas de motos",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
-  React.useEffect(() => {
-    const fetchSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      console.log('auth :>> ', data.session, error);
-    };
-    fetchSession();
-  }, []);
 
 
   return (
