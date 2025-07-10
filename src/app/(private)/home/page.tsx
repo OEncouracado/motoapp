@@ -4,7 +4,7 @@ import ResponsiveAppBar from "@/components/AppBar";
 import CartaoDeUsuarioHome from "@/components/CartaoDeUsuarioHome";
 import { useApp } from "@/context/AppContext";
 import { Box, Container, Grid, Paper, styled } from "@mui/material";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ListarClientes2 from "@/components/(Clientes)/ListarClientes2";
 import MenuOS from "@/components/(ordemDeServico)/MenuOS";
 import ListarOS from "@/components/(ordemDeServico)/ListarOS";
@@ -12,6 +12,7 @@ import ListarMotos from "@/components/(Motos)/ListarMotos";
 import MenuCliente from "@/components/(Clientes)/MenuClientes";
 import CadastrarClientesForm from "@/components/(Clientes)/CadastrarClientesForm";
 import MenuMotos from "@/components/(Motos)/MenuMotos";
+import Dashb from "@/components/(Dashboard)/Dashboard";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#1A2027",
@@ -86,7 +87,7 @@ export default function Dashboard() {
           </Grid>
           <Grid size={!isListar ? 8 : 10}>
             <Item>
-              {opcao === "home" && <div>Home</div>}
+              {opcao === "home" && <Dashb />}
               {opcao === "clientes" && menuCliente === "listar" && (
                 <ListarClientes2 />
               )}
