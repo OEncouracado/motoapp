@@ -5,7 +5,6 @@ import CartaoDeUsuarioHome from "@/components/CartaoDeUsuarioHome";
 import { useApp } from "@/context/AppContext";
 import { Box, Container, Grid, Paper, styled } from "@mui/material";
 import { useReducer } from "react";
-
 import ListarClientes2 from "@/components/(Clientes)/ListarClientes2";
 import MenuOS from "@/components/(ordemDeServico)/MenuOS";
 import ListarOS from "@/components/(ordemDeServico)/ListarOS";
@@ -17,8 +16,7 @@ import Dashb from "@/components/(Dashboard)/Dashboard";
 
 // 🎨 Estilo base do Paper
 const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: "#1A2027",
-  color: "white",
+  backgroundColor: theme.palette.background.default,
   textAlign: "center",
   padding: theme.spacing(2),
 }));
@@ -28,7 +26,7 @@ type OpcaoPrincipal =
   | "home"
   | "clientes"
   | "motos"
-  | "ordens_servico"
+  | "ordemsServico"
   | "estoque";
 type SubOpcao = "listar" | "nova";
 
@@ -38,7 +36,7 @@ type EstadoMenus = {
   submenus: {
     clientes: SubOpcao;
     motos: SubOpcao;
-    ordens_servico: SubOpcao;
+    ordemsServico: SubOpcao;
   };
 };
 
@@ -56,7 +54,7 @@ const estadoInicial: EstadoMenus = {
   submenus: {
     clientes: "listar",
     motos: "listar",
-    ordens_servico: "listar",
+    ordemsServico: "listar",
   },
 };
 
@@ -86,7 +84,7 @@ export default function Dashboard() {
 
   const isListar =
     opcao !== "home" &&
-    ["clientes", "motos", "ordens_servico"].includes(opcao) &&
+    ["clientes", "motos", "ordemsServico"].includes(opcao) &&
     submenus[opcao as keyof typeof submenus] === "listar";
 
   if (carregando) return <div>Carregando dados...</div>;
@@ -102,7 +100,7 @@ export default function Dashboard() {
   ) => {
     dispatch({ type: "SET_SUBMENU", payload: { menu, valor } });
   };
-
+  console.log("opcao :>> ", opcao);
   return (
     <>
       <ResponsiveAppBar handleSetOpcao={handleSetOpcao} />
@@ -113,7 +111,7 @@ export default function Dashboard() {
       >
         <Grid container spacing={3}>
           {/* Lateral esquerda */}
-          <Grid item xs={12} size={2}>
+          <Grid item size={2}>
             <Item>
               {opcao === "home" && <div>Bem-vindo ao Dashboard</div>}
               {opcao === "clientes" && (
@@ -126,11 +124,9 @@ export default function Dashboard() {
                   MotosMenuSelected={(op) => handleSetSubmenu("motos", op)}
                 />
               )}
-              {opcao === "ordens_servico" && (
+              {opcao === "ordemsServico" && (
                 <MenuOS
-                  OsMenuSelected={(op) =>
-                    handleSetSubmenu("ordens_servico", op)
-                  }
+                  OsMenuSelected={(op) => handleSetSubmenu("ordemsServico", op)}
                 />
               )}
               {opcao === "estoque" && <div>Estoque</div>}
@@ -138,10 +134,11 @@ export default function Dashboard() {
           </Grid>
 
           {/* Conteúdo central */}
-          <Grid item xs={12} size={isListar ? 10 : 8}>
+          <Grid item size={isListar ? 10 : 8}>
             <Item>
-              {opcao === "home" && <div>Home</div>}
-              {opcao === "clientes" && menuCliente === "listar" && (
+              {opcao === "home" && <Dashb handleSetOpcao={handleSetOpcao} />}
+
+              {opcao === "clientes" && submenus.clientes === "listar" && (
                 <ListarClientes2 />
               )}
               {opcao === "clientes" && submenus.clientes === "nova" && (
@@ -155,10 +152,10 @@ export default function Dashboard() {
                 <div>Formulário de Cadastrar Moto</div>
               )}
 
-              {opcao === "ordens_servico" &&
-                submenus.ordens_servico === "listar" && <ListarOS />}
-              {opcao === "ordens_servico" &&
-                submenus.ordens_servico === "nova" && (
+              {opcao === "ordemsServico" &&
+                submenus.ordemsServico === "listar" && <ListarOS />}
+              {opcao === "ordemsServico" &&
+                submenus.ordemsServico === "nova" && (
                   <div>Nova Ordem de Serviço</div>
                 )}
 
@@ -168,7 +165,7 @@ export default function Dashboard() {
 
           {/* Lateral direita */}
           {!isListar && (
-            <Grid item xs={12} size={2}>
+            <Grid item size={2}>
               <Item>
                 <CartaoDeUsuarioHome />
               </Item>

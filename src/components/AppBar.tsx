@@ -15,11 +15,12 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/TwoWheeler";
 import { useApp } from "@/context/AppContext";
+import BotaoTrocarTema from "./BotaoTrocarThema";
 
 const pages = [
   { id: 1, nome: "Clientes", option: "clientes" },
   { id: 2, nome: "Motos", option: "motos" },
-  { id: 3, nome: "Ordens de Serviço", option: "ordens_servico" },
+  { id: 3, nome: "Ordens de Serviço", option: "ordemsServico" },
   { id: 4, nome: "Estoque", option: "estoque" },
   { id: 5, nome: "Relatórios", option: "relatorios" },
 ];
@@ -41,7 +42,7 @@ function ResponsiveAppBar({
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
-  const { usuario, logOut } = useApp();
+  const { usuario, logOut, empresa } = useApp();
 
   function stringToColor(string: string) {
     let hash = 0;
@@ -88,7 +89,7 @@ function ResponsiveAppBar({
   };
 
   return (
-    <AppBar position="static" className="bg-dark mb-4">
+    <AppBar position="static" className="mb-4">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Button
@@ -107,7 +108,7 @@ function ResponsiveAppBar({
                 textDecoration: "none",
               }}
             >
-              OFICINA
+              {empresa?.nome}
             </Typography>
           </Button>
 
@@ -151,6 +152,7 @@ function ResponsiveAppBar({
             </Menu>
           </Box>
           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+
           <Typography
             variant="h5"
             noWrap
@@ -179,6 +181,9 @@ function ResponsiveAppBar({
                 {page.nome}
               </Button>
             ))}
+          </Box>
+          <Box sx={{ flexGrow: 0, display: { xs: "none", md: "flex" } }}>
+            <BotaoTrocarTema />
           </Box>
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">

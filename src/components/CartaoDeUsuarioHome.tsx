@@ -56,13 +56,15 @@ function CartaoDeUsuarioHome() {
         <Typography variant="h6" className="mt-2">
           {usuario?.nome}
         </Typography>
-        <Typography variant="body2" className="text-gray-500 my-2">
+        <Typography variant="body2" className=" my-2">
           {usuario?.email}
         </Typography>
-        <Typography variant="body2" className="text-gray-500">
+        <Typography variant="body2" className="">
           {usuario?.tipo}
         </Typography>
-        <button className="btn btn-outline-primary mt-5">Ver Perfil</button>
+        <Button variant="outlined" color="primary" className="mt-5">
+          Ver Perfil
+        </Button>
       </Box>
     </>
   );

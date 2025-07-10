@@ -68,7 +68,7 @@ export default function ListarOS() {
   if (carregando) return <div>Carregando Ordens de Serviço...</div>;
 
   return (
-    <Paper className="m-4" sx={{ backgroundColor: "#f5f5f5" }}>
+    <Paper elevation={3} className="m-4" sx={{}}>
       <Typography variant="h4" component="h1" className="p-4 text-center">
         Ordens de Serviço
         <CachedIcon

@@ -69,7 +69,7 @@ export default function ListarClientes2() {
   if (carregando) return <div>Carregando clientes...</div>;
 
   return (
-    <Paper className="m-4" sx={{ backgroundColor: "#f5f5f5" }}>
+    <Paper elevation={3} className="m-4" sx={{}}>
       <Typography variant="h4" component="h1" className="p-4 text-center">
         Clientes
         <CachedIcon

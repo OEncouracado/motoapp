@@ -68,6 +68,8 @@ type AppContextType = {
   logOut: () => Promise<void>;
   isLoggedIn: () => boolean;
   carregarSessao: () => Promise<void>;
+  themeMode: "light" | "dark";
+  toggleTheme: () => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -83,6 +85,20 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [motos, setMotos] = useState<Moto[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [ordemsServico, setOrdemsServico] = useState<OrdemServico[]>([]);
+  const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
+
+  const toggleTheme = () => {
+    const newTheme = themeMode === "dark" ? "light" : "dark";
+    setThemeMode(newTheme);
+    localStorage.setItem("themeMode", newTheme);
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("themeMode");
+    if (saved === "light" || saved === "dark") {
+      setThemeMode(saved);
+    }
+  }, []);
 
   // 🔐 Login
   const logIn = async (email: string, password: string) => {
@@ -237,6 +253,8 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         motos,
         ordemsServico,
         carregarSessao,
+        themeMode,
+        toggleTheme,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Stack, Typography, Paper } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 
 export default function MenuOS({
   OsMenuSelected,
@@ -18,18 +18,14 @@ export default function MenuOS({
   ];
 
   return (
-    <Paper
-      className="bg-dark text-white"
-      elevation={3}
-      sx={{ p: 4, maxWidth: 400, margin: "auto" }}
-    >
+    <>
       <Typography variant="h5" gutterBottom>
         Opções
       </Typography>
       <Stack spacing={2}>
         {menuItems.map((item, idx) => (
           <Button
-            className="bg-secondary text-white"
+            className=""
             key={idx}
             variant="contained"
             fullWidth
@@ -39,6 +35,6 @@ export default function MenuOS({
           </Button>
         ))}
       </Stack>
-    </Paper>
+    </>
   );
 }
