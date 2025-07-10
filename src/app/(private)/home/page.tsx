@@ -4,7 +4,8 @@ import ResponsiveAppBar from "@/components/AppBar";
 import CartaoDeUsuarioHome from "@/components/CartaoDeUsuarioHome";
 import { useApp } from "@/context/AppContext";
 import { Box, Container, Grid, Paper, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useReducer } from "react";
+
 import ListarClientes2 from "@/components/(Clientes)/ListarClientes2";
 import MenuOS from "@/components/(ordemDeServico)/MenuOS";
 import ListarOS from "@/components/(ordemDeServico)/ListarOS";
@@ -14,6 +15,7 @@ import CadastrarClientesForm from "@/components/(Clientes)/CadastrarClientesForm
 import MenuMotos from "@/components/(Motos)/MenuMotos";
 import Dashb from "@/components/(Dashboard)/Dashboard";
 
+// 🎨 Estilo base do Paper
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#1A2027",
   color: "white",
@@ -21,100 +23,157 @@ const Item = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
+// 🔠 Tipos de opções
+type OpcaoPrincipal =
+  | "home"
+  | "clientes"
+  | "motos"
+  | "ordens_servico"
+  | "estoque";
+type SubOpcao = "listar" | "nova";
+
+// 📦 Estado do reducer
+type EstadoMenus = {
+  opcao: OpcaoPrincipal;
+  submenus: {
+    clientes: SubOpcao;
+    motos: SubOpcao;
+    ordens_servico: SubOpcao;
+  };
+};
+
+// 🎬 Ações do reducer
+type AcaoMenus =
+  | { type: "SET_OPCAO"; payload: OpcaoPrincipal }
+  | {
+      type: "SET_SUBMENU";
+      payload: { menu: keyof EstadoMenus["submenus"]; valor: SubOpcao };
+    };
+
+// 🧱 Estado inicial
+const estadoInicial: EstadoMenus = {
+  opcao: "home",
+  submenus: {
+    clientes: "listar",
+    motos: "listar",
+    ordens_servico: "listar",
+  },
+};
+
+// 🔁 Reducer principal
+function menuReducer(state: EstadoMenus, action: AcaoMenus): EstadoMenus {
+  switch (action.type) {
+    case "SET_OPCAO":
+      return { ...state, opcao: action.payload };
+    case "SET_SUBMENU":
+      return {
+        ...state,
+        submenus: {
+          ...state.submenus,
+          [action.payload.menu]: action.payload.valor,
+        },
+      };
+    default:
+      return state;
+  }
+}
+
 export default function Dashboard() {
-  const [opcao, setOpcao] = useState("home");
-  const [menuOs, setMenuOs] = useState("listar");
-  const [menuCliente, setMenuCliente] = useState("listar");
-  const [menuMotos, setMenuMotos] = useState("listar");
-  const [isListar, setIsListar] = useState(false);
+  const [state, dispatch] = useReducer(menuReducer, estadoInicial);
   const { carregando, empresa } = useApp();
 
-  console.log("empresa :>> ", empresa);
+  const { opcao, submenus } = state;
 
-  useEffect(() => {
-    const deveListar =
-      (menuOs === "listar" ||
-        menuCliente === "listar" ||
-        menuMotos === "listar") &&
-      opcao !== "home";
-
-    if (isListar !== deveListar) {
-      setIsListar(deveListar);
-    }
-  }, [menuOs, menuCliente, menuMotos, opcao]);
+  const isListar =
+    opcao !== "home" &&
+    ["clientes", "motos", "ordens_servico"].includes(opcao) &&
+    submenus[opcao as keyof typeof submenus] === "listar";
 
   if (carregando) return <div>Carregando dados...</div>;
 
-  const handleSetOpcao = (valorOpcao: string) => {
-    setOpcao(valorOpcao);
-    console.log("1 Opção selecionada:", opcao);
+  // 🧭 Ações
+  const handleSetOpcao = (valorOpcao: OpcaoPrincipal) => {
+    dispatch({ type: "SET_OPCAO", payload: valorOpcao });
   };
 
-  const MotosMenuSelected = (valorOpcao: string) => {
-    setMenuMotos(valorOpcao);
-    console.log("2 Opção selecionada:", menuOs);
+  const handleSetSubmenu = (
+    menu: keyof EstadoMenus["submenus"],
+    valor: SubOpcao
+  ) => {
+    dispatch({ type: "SET_SUBMENU", payload: { menu, valor } });
   };
-  const OsMenuSelected = (valorOpcao: string) => {
-    setMenuOs(valorOpcao);
-    console.log("2 Opção selecionada:", menuOs);
-  };
-  const ClienteMenuSelected = (valorOpcao: string) => {
-    setMenuCliente(valorOpcao);
-    console.log("3 Opção selecionada:", menuOs);
-  };
+
   return (
     <>
       <ResponsiveAppBar handleSetOpcao={handleSetOpcao} />
+
       <Box
         component={Container}
         sx={{ flexGrow: 1, padding: 2, maxWidth: "98dvw !important" }}
       >
         <Grid container spacing={3}>
-          <Grid size={2}>
+          {/* Lateral esquerda */}
+          <Grid item xs={12} size={2}>
             <Item>
               {opcao === "home" && <div>Bem-vindo ao Dashboard</div>}
               {opcao === "clientes" && (
-                <MenuCliente ClienteMenuSelected={ClienteMenuSelected} />
+                <MenuCliente
+                  ClienteMenuSelected={(op) => handleSetSubmenu("clientes", op)}
+                />
               )}
               {opcao === "motos" && (
-                <MenuMotos MotosMenuSelected={MotosMenuSelected} />
+                <MenuMotos
+                  MotosMenuSelected={(op) => handleSetSubmenu("motos", op)}
+                />
               )}
               {opcao === "ordens_servico" && (
-                <MenuOS OsMenuSelected={OsMenuSelected} />
+                <MenuOS
+                  OsMenuSelected={(op) =>
+                    handleSetSubmenu("ordens_servico", op)
+                  }
+                />
               )}
               {opcao === "estoque" && <div>Estoque</div>}
             </Item>
           </Grid>
-          <Grid size={!isListar ? 8 : 10}>
+
+          {/* Conteúdo central */}
+          <Grid item xs={12} size={isListar ? 10 : 8}>
             <Item>
-              {opcao === "home" && <Dashb />}
+              {opcao === "home" && <div>Home</div>}
               {opcao === "clientes" && menuCliente === "listar" && (
                 <ListarClientes2 />
               )}
-              {opcao === "clientes" && menuCliente === "nova" && (
+              {opcao === "clientes" && submenus.clientes === "nova" && (
                 <CadastrarClientesForm />
               )}
-              {opcao === "motos" && menuMotos === "listar" && <ListarMotos />}
-              {opcao === "motos" && menuMotos === "nova" && (
+
+              {opcao === "motos" && submenus.motos === "listar" && (
+                <ListarMotos />
+              )}
+              {opcao === "motos" && submenus.motos === "nova" && (
                 <div>Formulário de Cadastrar Moto</div>
               )}
-              {opcao === "ordens_servico" && menuOs === "listar" && (
-                <ListarOS />
-              )}
-              {opcao === "ordens_servico" && menuOs === "nova" && (
-                <div>Nova Ordens de Serviço</div>
-              )}
+
+              {opcao === "ordens_servico" &&
+                submenus.ordens_servico === "listar" && <ListarOS />}
+              {opcao === "ordens_servico" &&
+                submenus.ordens_servico === "nova" && (
+                  <div>Nova Ordem de Serviço</div>
+                )}
+
               {opcao === "estoque" && <div>Estoque</div>}
             </Item>
           </Grid>
-          <Grid
-            size={!isListar ? 2 : 0}
-            sx={{ display: isListar ? "none" : "block" }}
-          >
-            <Item>
-              <CartaoDeUsuarioHome />
-            </Item>
-          </Grid>
+
+          {/* Lateral direita */}
+          {!isListar && (
+            <Grid item xs={12} size={2}>
+              <Item>
+                <CartaoDeUsuarioHome />
+              </Item>
+            </Grid>
+          )}
         </Grid>
       </Box>
     </>
