@@ -1,56 +1,51 @@
 "use client";
 
 import { useApp } from "@/context/AppContext";
-import { Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import { ptBR } from "@mui/x-data-grid/locales";
 import CachedIcon from "@mui/icons-material/Cached";
+import { useState } from "react";
+import FichaClienteModal from "./FichaClienteModal";
 
 export default function ListarClientes2() {
+  const [clienteSelecionado, setClienteSelecionado] = useState();
+  const [modalAberta, setModalAberta] = useState(false);
+
+  const handleRowClick = (params) => {
+    setClienteSelecionado(params.row); // dados do cliente
+    setModalAberta(true);
+  };
   const { clientes, carregando, motos, carregarSessao } = useApp();
-  console.log("motos :>> ", motos);
   const colunas: GridColDef[] = [
     { field: "nome", headerName: "Nome", flex: 1 },
     { field: "email", headerName: "E-mail", flex: 1 },
     { field: "telefone", headerName: "Telefone", flex: 1 },
     { field: "cpf", headerName: "CPF", flex: 1 },
+    { field: "endereco", headerName: "Endereço", flex: 1 },
     { field: "criado_em", headerName: "Cliente desde:", type: "date", flex: 1 },
-    {
-      field: "motos",
-      headerName: "Motos",
-      flex: 1,
-      sortable: false,
-      renderCell: (params) => (
-        <div>
-          <button
-            className="btn btn-secondary me-2"
-            onClick={() => alert(`Listar motos do cliente: ${params.row.nome}`)}
-          >
-            Ver Motos
-          </button>
-        </div>
-      ),
-    },
     {
       field: "actions",
       headerName: "Ações",
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <div>
-          <button
-            className="btn btn-primary me-2"
-            onClick={() => alert(`Editar cliente: ${params.row.nome}`)}
-          >
-            Editar
-          </button>
-          <button
-            className="btn btn-danger me-2"
-            onClick={() => alert(`Excluir cliente: ${params.row.nome}`)}
-          >
-            Excluir
-          </button>
-        </div>
+        <Box component={Grid} container>
+          <Grid size={6}>
+            <Button variant="contained" onClick={() => handleRowClick(params)}>
+              ver
+            </Button>
+          </Grid>
+          <Grid size={6}>
+            <Button
+              variant="contained"
+              color="info"
+              onClick={() => alert(`Excluir cliente: ${params.row.nome}`)}
+            >
+              Editar
+            </Button>
+          </Grid>
+        </Box>
       ),
     },
   ];
@@ -60,6 +55,7 @@ export default function ListarClientes2() {
     nome: cliente.nome,
     email: cliente.email,
     telefone: cliente.telefone,
+    endereco: cliente.endereco,
     cpf: cliente.cpf,
     criado_em: new Date(cliente.criado_em!),
   }));
@@ -69,24 +65,31 @@ export default function ListarClientes2() {
   if (carregando) return <div>Carregando clientes...</div>;
 
   return (
-    <Paper elevation={3} className="m-4" sx={{}}>
-      <Typography variant="h4" component="h1" className="p-4 text-center">
-        Clientes
-        <CachedIcon
-          className="ms-2"
-          onClick={carregarSessao}
-          style={{ cursor: "pointer" }}
+    <>
+      <Paper elevation={3} className="m-4" sx={{}}>
+        <Typography variant="h4" component="h1" className="p-4 text-center">
+          Clientes
+          <CachedIcon
+            className="ms-2"
+            onClick={carregarSessao}
+            style={{ cursor: "pointer" }}
+          />
+        </Typography>
+        <DataGrid
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rows={linhas}
+          columns={colunas}
+          initialState={{ pagination: { paginationModel } }}
+          pageSizeOptions={[5, 10, 20]}
+          checkboxSelection
+          disableRowSelectionOnClick
         />
-      </Typography>
-      <DataGrid
-        localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-        rows={linhas}
-        columns={colunas}
-        initialState={{ pagination: { paginationModel } }}
-        pageSizeOptions={[5, 10, 20]}
-        checkboxSelection
-        disableRowSelectionOnClick
+      </Paper>
+      <FichaClienteModal
+        aberto={modalAberta}
+        onFechar={() => setModalAberta(false)}
+        cliente={clienteSelecionado}
       />
-    </Paper>
+    </>
   );
 }

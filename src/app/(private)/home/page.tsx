@@ -13,6 +13,7 @@ import MenuCliente from "@/components/(Clientes)/MenuClientes";
 import CadastrarClientesForm from "@/components/(Clientes)/CadastrarClientesForm";
 import MenuMotos from "@/components/(Motos)/MenuMotos";
 import Dashb from "@/components/(Dashboard)/Dashboard";
+import CadastrarMotoForm from "@/components/(Motos)/CadastrarMotoForm";
 
 // 🎨 Estilo base do Paper
 const Item = styled(Paper)(({ theme }) => ({
@@ -111,7 +112,7 @@ export default function Dashboard() {
       >
         <Grid container spacing={3}>
           {/* Lateral esquerda */}
-          <Grid item size={2}>
+          <Grid size={2}>
             <Item>
               {opcao === "home" && <div>Bem-vindo ao Dashboard</div>}
               {opcao === "clientes" && (
@@ -134,7 +135,7 @@ export default function Dashboard() {
           </Grid>
 
           {/* Conteúdo central */}
-          <Grid item size={isListar ? 10 : 8}>
+          <Grid size={isListar ? 10 : 8}>
             <Item>
               {opcao === "home" && <Dashb handleSetOpcao={handleSetOpcao} />}
 
@@ -149,7 +150,7 @@ export default function Dashboard() {
                 <ListarMotos />
               )}
               {opcao === "motos" && submenus.motos === "nova" && (
-                <div>Formulário de Cadastrar Moto</div>
+                <CadastrarMotoForm />
               )}
 
               {opcao === "ordemsServico" &&
@@ -165,7 +166,7 @@ export default function Dashboard() {
 
           {/* Lateral direita */}
           {!isListar && (
-            <Grid item size={2}>
+            <Grid size={2}>
               <Item>
                 <CartaoDeUsuarioHome />
               </Item>

@@ -16,6 +16,8 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/TwoWheeler";
 import { useApp } from "@/context/AppContext";
 import BotaoTrocarTema from "./BotaoTrocarThema";
+import { useTheme } from "@mui/material/styles";
+import Image from "next/image";
 
 const pages = [
   { id: 1, nome: "Clientes", option: "clientes" },
@@ -100,9 +102,17 @@ function ResponsiveAppBar({
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
-
+  const theme = useTheme();
+  console.log("empresa.logo :>> ", empresa?.logo);
   return (
-    <AppBar position="static" className="mb-4">
+    <AppBar
+      position="static"
+      sx={{
+        backgroundColor:
+          theme.palette.mode === "dark" ? "" : theme.customColors.mono,
+      }}
+      className="mb-4"
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Button
@@ -110,7 +120,18 @@ function ResponsiveAppBar({
             variant="text"
             onClick={() => handleSetOpcao("home")}
           >
-            <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+            {empresa?.logo ? (
+              <img
+                style={{
+                  width: "3rem",
+                  filter: "brightness(0) invert(1)",
+                }}
+                src={empresa?.logo}
+                alt={empresa?.nome}
+              />
+            ) : (
+              <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+            )}
             <Typography
               variant="h6"
               sx={{

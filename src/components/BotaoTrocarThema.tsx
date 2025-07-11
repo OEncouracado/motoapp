@@ -5,7 +5,6 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 export default function BotaoTrocarTema() {
   const { themeMode, toggleTheme } = useApp();
-  console.log("themeMode :>> ", themeMode);
   return (
     <IconButton onClick={toggleTheme} color="inherit">
       {themeMode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
