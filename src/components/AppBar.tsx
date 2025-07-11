@@ -65,11 +65,24 @@ function ResponsiveAppBar({
   }
 
   function stringAvatar(name: string) {
+    const parts = name.trim().split(" ").filter(Boolean); // Remove espaços extras
+
+    let initials = "";
+
+    if (parts.length === 0) {
+      initials = "?";
+    } else if (parts.length === 1) {
+      initials = parts[0][0];
+    } else {
+      // Pega a primeira letra dos dois primeiros nomes
+      initials = parts[0][0] + parts[1][0];
+    }
+
     return {
       sx: {
         bgcolor: stringToColor(name),
       },
-      children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+      children: initials.toUpperCase(),
     };
   }
 

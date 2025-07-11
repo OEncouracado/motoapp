@@ -1,16 +1,7 @@
 "use client";
 
 import { useApp } from "@/context/AppContext";
-import {
-  Avatar,
-  Box,
-  Button,
-  Container,
-  Grid,
-  Paper,
-  styled,
-  Typography,
-} from "@mui/material";
+import { Avatar, Box, Button, Container, Typography } from "@mui/material";
 import React from "react";
 
 function CartaoDeUsuarioHome() {
@@ -36,15 +27,28 @@ function CartaoDeUsuarioHome() {
   }
 
   function stringAvatar(name: string) {
+    const parts = name.trim().split(" ").filter(Boolean); // divide e remove espaços vazios
+
+    let initials = "";
+
+    if (parts.length === 0) {
+      initials = "?";
+    } else if (parts.length === 1) {
+      initials = parts[0][0];
+    } else {
+      initials = parts[0][0] + parts[1][0];
+    }
+
     return {
       sx: {
         bgcolor: stringToColor(name),
         width: "5rem",
         height: "5rem",
       },
-      children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+      children: initials.toUpperCase(),
     };
   }
+
   return (
     <>
       <Box
