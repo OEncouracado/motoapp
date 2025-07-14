@@ -12,6 +12,8 @@ import {
   Paper,
   MenuItem,
 } from "@mui/material";
+import placeholder from "../../images/placeholder-0x250.webp";
+import "./index.css";
 
 export default function CadastrarMotoForm() {
   const {
@@ -32,16 +34,28 @@ export default function CadastrarMotoForm() {
   const [cor, setCor] = useState("");
   const [clienteId, setClienteId] = useState(""); // se for usado para vincular a cliente
   const [clienteNome, setClienteNome] = useState(""); // se for usado para vincular a cliente
-  const [anos, setAnos] = useState([]);
+  const [anos, setAnos] = useState<number[]>([]);
 
-  const anosTrim = modeloAnosSelecinados.split("a");
-  const I = Number(anosTrim[0].trim());
-  const N = Number(anosTrim[1].trim());
+  useEffect(() => {
+    if (!modeloAnosSelecinados) return;
 
-  const anosOpcao = Array.from({ length: N - I + 1 }, (_, i) => I + i);
+    const anosTrim = modeloAnosSelecinados.split("a");
+    const Start = Number(anosTrim[0].trim());
+    let End = Number(anosTrim[1]?.trim());
 
-  console.log("anosParte :>> ", I, N);
-  console.log("anosOpcao :>> ", anosOpcao);
+    if (isNaN(End)) {
+      End = new Date().getFullYear();
+    }
+
+    if (!isNaN(Start) && Start <= End) {
+      const anosOpcao = Array.from(
+        { length: End - Start + 1 },
+        (_, i) => Start + i
+      );
+      setAnos(anosOpcao);
+    }
+  }, [modeloAnosSelecinados]);
+
   useEffect(() => {
     carregarMarcas(); // só carrega as marcas uma vez
   }, []);
@@ -51,11 +65,13 @@ export default function CadastrarMotoForm() {
       carregarModelosPorMarca(marcaSelecionada); // carrega modelos da marca escolhida
     }
   }, [marcaSelecionada]);
-  console.log("marcas :>> ", marcas);
-  console.log("modelos :>> ", modelos);
-  console.log("marcaSelecionada :>> ", marcaSelecionada);
-  console.log("modeloSelecionado :>> ", modeloSelecionado);
-  console.log("modeloAnosSelecionados :>> ", modeloAnosSelecinados);
+  // console.log("marcas :>> ", marcas);
+  // console.log("modelos :>> ", modelos);
+  // console.log("marcaSelecionada :>> ", marcaSelecionada);
+  // console.log("modeloSelecionado :>> ", modeloSelecionado);
+  // console.log("modeloAnosSelecionados :>> ", modeloAnosSelecinados);
+  console.log("ano :>> ", ano);
+  console.log("anos :>> ", anos);
 
   const handleMarcaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const id = event.target.value;
@@ -101,92 +117,105 @@ export default function CadastrarMotoForm() {
         Cadastrar Moto
       </Typography>
       <Box component="form" onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid size={6}>
-            <TextField
-              select
-              fullWidth
-              label="Marca"
-              value={marcaSelecionada}
-              onChange={handleMarcaChange}
-              required
-            >
-              {marcas?.map((marca) => (
-                <MenuItem key={marca.id} value={marca.id}>
-                  {marca.brand}
-                </MenuItem>
-              ))}
-            </TextField>
+        <Grid container size={12} spacing={2}>
+          <Grid className="moto" container size={4}>
+            {/* <input type="image" alt="motos" width={"100%"} /> */}
           </Grid>
+          <Grid container spacing={2} size={8}>
+            <Grid size={6}>
+              <TextField
+                select
+                fullWidth
+                label="Marca"
+                value={marcaSelecionada}
+                onChange={handleMarcaChange}
+                required
+              >
+                {marcas?.map((marca) => (
+                  <MenuItem key={marca.id} value={marca.id}>
+                    {marca.brand}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
 
-          <Grid size={2}>
-            <TextField
-              select
-              fullWidth
-              label="Modelo"
-              value={modeloSelecionado}
-              onChange={handleModeloChange}
-              required
-              disabled={!modelos || modelos.length === 0}
-            >
-              {modelos?.map((modelo) => (
-                <MenuItem key={modelo.id} value={modelo.id}>
-                  {modelo.model}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-          <Grid size={4}>
-            <TextField
-              select
-              fullWidth
-              label="Cliente"
-              value={clienteId}
-              onChange={handleClienteChange}
-              required
-              disabled={!clientes || clientes.length === 0}
-            >
-              {clientes?.map((cliente) => (
-                <MenuItem key={cliente.id} value={cliente.id}>
-                  {cliente.nome}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
+            <Grid size={2}>
+              <TextField
+                select
+                fullWidth
+                label="Modelo"
+                value={modeloSelecionado}
+                onChange={handleModeloChange}
+                required
+                disabled={!modelos || modelos.length === 0}
+              >
+                {modelos?.map((modelo) => (
+                  <MenuItem key={modelo.id} value={modelo.id}>
+                    {modelo.model}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid size={4}>
+              <TextField
+                select
+                fullWidth
+                label="Cliente"
+                value={clienteId}
+                onChange={handleClienteChange}
+                required
+                disabled={!clientes || clientes.length === 0}
+              >
+                {clientes?.map((cliente) => (
+                  <MenuItem key={cliente.id} value={cliente.id}>
+                    {cliente.nome}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
 
-          <Grid size={4}>
-            <TextField
-              fullWidth
-              label="Ano"
-              value={ano}
-              onChange={(e) => setAno(e.target.value)}
-              required
-            />
-          </Grid>
+            <Grid size={4}>
+              <TextField
+                select
+                fullWidth
+                label="Ano"
+                value={ano}
+                onChange={(e) => setAno(e.target.value)}
+                required
+                disabled={!anos || anos.length === 0}
+              >
+                {anos?.map((ano) => (
+                  <MenuItem key={ano} value={ano}>
+                    {ano}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
 
-          <Grid size={4}>
-            <TextField
-              fullWidth
-              label="Placa"
-              value={placa}
-              onChange={(e) => setPlaca(e.target.value.toUpperCase())}
-              required
-            />
-          </Grid>
+            <Grid size={4}>
+              <TextField
+                fullWidth
+                label="Placa"
+                value={placa}
+                onChange={(e) => setPlaca(e.target.value.toUpperCase())}
+                required
+              />
+            </Grid>
 
-          <Grid size={4}>
-            <TextField
-              fullWidth
-              label="Cor"
-              value={cor}
-              onChange={(e) => setCor(e.target.value)}
-            />
-          </Grid>
+            <Grid size={4}>
+              <TextField
+                fullWidth
+                label="Cor"
+                value={cor}
+                onChange={(e) => setCor(e.target.value)}
+              />
+            </Grid>
 
-          <Grid size={12}>
-            <Button variant="contained" type="submit">
-              Cadastrar
-            </Button>
+            <Grid size={12}>
+              <Button variant="contained" type="submit">
+                Cadastrar
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
       </Box>
