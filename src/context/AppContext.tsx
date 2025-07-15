@@ -1,4 +1,4 @@
-// src/contexts/AppContext.tsx
+// ---------- IMPORTAÇÕES ----------
 "use client";
 
 import {
@@ -10,6 +10,7 @@ import {
 } from "react";
 import { supabase } from "./supabase";
 
+// ---------- TIPAGENS ----------
 type Usuario = {
   id: string;
   email: string;
@@ -32,6 +33,14 @@ type Cliente = {
   telefone: string;
   cpf?: string;
   criado_em?: string;
+  endereco?: string;
+};
+
+type NovoCliente = {
+  nome: string;
+  email: string;
+  telefone: string;
+  cpf?: string;
   endereco?: string;
 };
 
@@ -72,6 +81,7 @@ type ModeloFipe = {
   years: string;
 };
 
+// ---------- CONTEXTO ----------
 type AppContextType = {
   usuario: Usuario | null;
   empresa: Empresa | null;
@@ -89,6 +99,7 @@ type AppContextType = {
   modelos?: ModeloFipe[];
   carregarMarcas: () => Promise<void>;
   carregarModelosPorMarca: (marcaId: string) => Promise<void>;
+  cadastrarCliente: (novoCliente: NovoCliente) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -97,9 +108,12 @@ type AppProviderProps = {
   children: ReactNode;
 };
 
+// ---------- TOKEN DA API FIPE ----------
 const tokenIVTXT = process.env.NEXT_PUBLIC_INVERTEXTO_TOKEN;
 
+// ---------- PROVIDER DO CONTEXTO ----------
 export const AppProvider = ({ children }: AppProviderProps) => {
+  // ---------- STATES GLOBAIS ----------
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -110,12 +124,14 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [marcas, setMarcas] = useState<MarcaFipe[]>([]);
   const [modelos, setModelos] = useState<ModeloFipe[]>([]);
 
+  // ---------- TEMA ----------
   const toggleTheme = () => {
     const newTheme = themeMode === "dark" ? "light" : "dark";
     setThemeMode(newTheme);
     localStorage.setItem("themeMode", newTheme);
   };
 
+  // ---------- API FIPE ----------
   const carregarMarcas = async () => {
     try {
       const res = await fetch(
@@ -140,6 +156,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     }
   };
 
+  // ---------- CARREGAR PREFERÊNCIA DE TEMA AO INICIAR ----------
   useEffect(() => {
     const saved = localStorage.getItem("themeMode");
     if (saved === "light" || saved === "dark") {
@@ -147,6 +164,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     }
   }, []);
 
+  // ---------- AUTENTICAÇÃO ----------
   const logIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -166,11 +184,11 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   const isLoggedIn = () => !!usuario;
 
+  // ---------- CARREGAR SESSÃO DO USUÁRIO LOGADO ----------
   const carregarSessao = async () => {
     setCarregando(true);
     try {
       const { data: userData, error } = await supabase.auth.getUser();
-
       if (error || !userData.user) throw new Error("Usuário não autenticado");
 
       const usuarioId = userData.user.id;
@@ -211,6 +229,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         )
         .eq("empresa_id", usuarioSistema.empresa_id);
 
+      // Setar tudo no contexto
       setUsuario({
         id: usuarioId,
         email: userData.user.email ?? "",
@@ -218,7 +237,6 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         sobrenome: usuarioSistema.sobrenome,
         tipo: usuarioSistema.tipo,
       });
-
       setEmpresa(empresaData);
       setClientes(clienteData ?? []);
       setMotos(motoData ?? []);
@@ -235,10 +253,32 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     }
   };
 
+  // ---------- CARREGAR SESSÃO AUTOMATICAMENTE ----------
   useEffect(() => {
     carregarSessao();
   }, []);
+  //---------- CADASTRAR CLIENTE ----------
+  const cadastrarCliente = async (
+    novoCliente: Omit<Cliente, "id" | "criado_em">
+  ) => {
+    if (!empresa) return;
 
+    const { data, error } = await supabase
+      .from("clientes")
+      .insert({
+        ...novoCliente,
+        empresa_id: empresa.id,
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    // Atualiza o estado de clientes local
+    setClientes((prev) => [...(prev ?? []), data]);
+  };
+
+  // ---------- PROVIDER ----------
   return (
     <AppContext.Provider
       value={{
@@ -258,6 +298,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         modelos,
         carregarMarcas,
         carregarModelosPorMarca,
+        cadastrarCliente,
       }}
     >
       {children}
@@ -265,6 +306,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   );
 };
 
+// ---------- HOOK DE USO DO CONTEXTO ----------
 export const useApp = () => {
   const context = useContext(AppContext);
   if (!context) {

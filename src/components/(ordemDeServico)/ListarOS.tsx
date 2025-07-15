@@ -5,10 +5,19 @@ import { Paper, Typography } from "@mui/material";
 import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import CachedIcon from "@mui/icons-material/Cached";
 import { ptBR } from "@mui/x-data-grid/locales";
+import { useState } from "react";
+import FichaOrdemServicoModal from "./FichaOSModal";
 
 export default function ListarOS() {
+  const [modalAberta, setModalAberta] = useState(false);
+  const [osSelecionadaId, setOsSelecionadaId] = useState<string | null>(null);
   const { clientes, carregando, motos, ordemsServico, carregarSessao } =
     useApp();
+
+  const handleAbrirModal = (id: string) => {
+    setOsSelecionadaId(id);
+    setModalAberta(true);
+  };
 
   const colunas: GridColDef[] = [
     { field: "num", headerName: "Ordem Nº", flex: 1 },
@@ -39,7 +48,7 @@ export default function ListarOS() {
         <div>
           <button
             className="btn btn-primary me-2"
-            onClick={() => alert(`Editar OS: ${params.row.cliente}`)}
+            onClick={() => handleAbrirModal(params.row.id)}
           >
             Ver OS
           </button>
@@ -53,7 +62,7 @@ export default function ListarOS() {
     num: os.numero ?? 0, // Adiciona o número da ordem se existir
     cliente: clientes?.find((c) => c.id === os.cliente_id)?.nome ?? "",
     moto: motos?.find((m) => m.id === os.moto_id)?.modelo ?? "",
-    status: os.status,
+    status: os.status.replace("_", " "),
     data_abertura: os.data_abertura ? new Date(os.data_abertura) : null,
     data_entrega_previsao: os.data_entrega_previsao
       ? new Date(os.data_entrega_previsao)
@@ -68,24 +77,31 @@ export default function ListarOS() {
   if (carregando) return <div>Carregando Ordens de Serviço...</div>;
 
   return (
-    <Paper elevation={3} className="m-4" sx={{}}>
-      <Typography variant="h4" component="h1" className="p-4 text-center">
-        Ordens de Serviço
-        <CachedIcon
-          className="ms-2"
-          onClick={carregarSessao}
-          style={{ cursor: "pointer" }}
+    <>
+      <Paper elevation={3} className="m-4" sx={{}}>
+        <Typography variant="h4" component="h1" className="p-4 text-center">
+          Ordens de Serviço
+          <CachedIcon
+            className="ms-2"
+            onClick={carregarSessao}
+            style={{ cursor: "pointer" }}
+          />
+        </Typography>
+        <DataGrid
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rows={linhas}
+          columns={colunas}
+          initialState={{ pagination: { paginationModel } }}
+          pageSizeOptions={[5, 10, 20]}
+          checkboxSelection
+          disableRowSelectionOnClick
         />
-      </Typography>
-      <DataGrid
-        localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-        rows={linhas}
-        columns={colunas}
-        initialState={{ pagination: { paginationModel } }}
-        pageSizeOptions={[5, 10, 20]}
-        checkboxSelection
-        disableRowSelectionOnClick
+      </Paper>
+      <FichaOrdemServicoModal
+        aberto={modalAberta}
+        onFechar={() => setModalAberta(false)}
+        ordemServicoId={osSelecionadaId}
       />
-    </Paper>
+    </>
   );
 }

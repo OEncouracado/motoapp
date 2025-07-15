@@ -1,11 +1,13 @@
 import React from "react";
 import { Button, Stack, Typography } from "@mui/material";
+import { useApp } from "@/context/AppContext";
 
 export default function MenuCliente({
   ClienteMenuSelected,
 }: {
   ClienteMenuSelected: (action: string) => void;
 }) {
+  const { usuario } = useApp();
   const menuItems = [
     {
       label: "Listar Clientes",
@@ -29,6 +31,7 @@ export default function MenuCliente({
             key={idx}
             variant="contained"
             fullWidth
+            disabled={item.action === "nova" && usuario?.tipo === "funcionario"}
             onClick={() => ClienteMenuSelected(item.action)}
           >
             {item.label}

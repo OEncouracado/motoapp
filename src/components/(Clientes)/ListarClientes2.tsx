@@ -16,7 +16,7 @@ export default function ListarClientes2() {
     setClienteSelecionado(params.row); // dados do cliente
     setModalAberta(true);
   };
-  const { clientes, carregando, motos, carregarSessao } = useApp();
+  const { clientes, carregando, motos, carregarSessao, usuario } = useApp();
   const colunas: GridColDef[] = [
     { field: "nome", headerName: "Nome", flex: 1 },
     { field: "email", headerName: "E-mail", flex: 1 },
@@ -31,20 +31,29 @@ export default function ListarClientes2() {
       sortable: false,
       renderCell: (params) => (
         <Box component={Grid} container>
-          <Grid size={6}>
+          <Grid size={usuario?.tipo === "admin" ? 6 : 12}>
             <Button variant="contained" onClick={() => handleRowClick(params)}>
               ver
             </Button>
           </Grid>
-          <Grid size={6}>
-            <Button
-              variant="contained"
-              color="info"
-              onClick={() => alert(`Excluir cliente: ${params.row.nome}`)}
-            >
-              Editar
-            </Button>
-          </Grid>
+          {usuario?.tipo === "admin" ? (
+            <Grid size={6}>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() =>
+                  confirm(
+                    `Tem certeza? 
+Excluir cliente: ${params.row.nome}`
+                  )
+                }
+              >
+                Excluir
+              </Button>
+            </Grid>
+          ) : (
+            ""
+          )}
         </Box>
       ),
     },

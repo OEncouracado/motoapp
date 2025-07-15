@@ -4,15 +4,14 @@ import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import {
   TextField,
-  Menu,
   Button,
   Grid,
   Typography,
   Box,
   Paper,
   MenuItem,
+  Input,
 } from "@mui/material";
-import placeholder from "../../images/placeholder-0x250.webp";
 import "./index.css";
 
 export default function CadastrarMotoForm() {
@@ -118,9 +117,14 @@ export default function CadastrarMotoForm() {
       </Typography>
       <Box component="form" onSubmit={handleSubmit}>
         <Grid container size={12} spacing={2}>
-          <Grid className="moto" container size={4}>
-            {/* <input type="image" alt="motos" width={"100%"} /> */}
-          </Grid>
+          <Grid
+            component={Input}
+            type="file"
+            sx={{ color: "#000", textAlign: "center" }}
+            className="moto"
+            container
+            size={4}
+          />
           <Grid container spacing={2} size={8}>
             <Grid size={6}>
               <TextField
