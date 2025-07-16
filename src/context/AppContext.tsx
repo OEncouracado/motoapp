@@ -55,6 +55,17 @@ type Moto = {
   chassi?: string;
 };
 
+type NovaMoto = {
+  cliente_id: string;
+  marca: string;
+  modelo: string;
+  ano: string;
+  placa: string;
+  cor: string;
+  chassi: string;
+  imagem?: string;
+};
+
 type OrdemServico = {
   id: string;
   numero: number;
@@ -81,6 +92,20 @@ type ModeloFipe = {
   years: string;
 };
 
+type Produtos = {
+  id: string;
+  empresa_id: string;
+  nome: string;
+  codigo: string;
+  quantidade: number;
+  valor_compra: number;
+  valor_venda: number;
+  criado_em?: string;
+  descricao?: string; // opcional
+  unidade?: string; // ex: "un", "kg", "litro"
+  categoria?: string; // ex: "Lubrificante", "Peça", etc.
+};
+
 // ---------- CONTEXTO ----------
 type AppContextType = {
   usuario: Usuario | null;
@@ -100,6 +125,9 @@ type AppContextType = {
   carregarMarcas: () => Promise<void>;
   carregarModelosPorMarca: (marcaId: string) => Promise<void>;
   cadastrarCliente: (novoCliente: NovoCliente) => Promise<void>;
+  cadastrarMoto: (novaMoto: NovaMoto) => Promise<void>;
+  produtos?: Produtos[];
+  carregarProdutos: () => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -118,6 +146,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [motos, setMotos] = useState<Moto[]>([]);
+  const [produtos, setProdutos] = useState<Produtos[]>([]);
   const [ordemsServico, setOrdemsServico] = useState<OrdemServico[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
@@ -277,6 +306,40 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     // Atualiza o estado de clientes local
     setClientes((prev) => [...(prev ?? []), data]);
   };
+  //---------- CADASTRAR MOTO ----------
+  const cadastrarMoto = async (novaMoto: NovaMoto) => {
+    if (!empresa) return;
+
+    const { data, error } = await supabase
+      .from("motos")
+      .insert([novaMoto])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    // Atualiza o estado de motos local
+    setMotos((prev) => [...(prev ?? []), data]);
+  };
+  const carregarProdutos = async () => {
+    if (!empresa) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("produtos")
+        .select(
+          "id, empresa_id, nome, codigo, quantidade, valor_compra, valor_venda, criado_em, descricao, unidade, categoria"
+        )
+        .eq("empresa_id", empresa.id);
+
+      if (error) throw new Error(error.message);
+
+      setProdutos(data ?? []);
+    } catch (err) {
+      console.error("Erro ao carregar produtos:", err);
+      setProdutos([]);
+    }
+  };
 
   // ---------- PROVIDER ----------
   return (
@@ -299,6 +362,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         carregarMarcas,
         carregarModelosPorMarca,
         cadastrarCliente,
+        cadastrarMoto,
+        produtos,
+        carregarProdutos,
       }}
     >
       {children}

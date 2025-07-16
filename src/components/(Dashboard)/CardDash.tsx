@@ -48,7 +48,12 @@ export default function CardDash({ tipo, titulo, onClick }: CardDashProps) {
   const app = useApp();
 
   // Mapeia dinamicamente o conteúdo com base na prop `tipo`
-  const dados = tipo in app ? (app as Record<string, unknown>)[tipo] ?? [] : [];
+  const dados =
+    tipo === "estoque"
+      ? (app.produtos ?? [])
+      : tipo in app
+        ? ((app as Record<string, unknown>)[tipo] ?? [])
+        : [];
   const tituloCard = titulo || tipo.charAt(0).toUpperCase() + tipo.slice(1);
 
   return (

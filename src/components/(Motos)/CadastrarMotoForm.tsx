@@ -22,6 +22,7 @@ export default function CadastrarMotoForm() {
     carregarMarcas,
     carregarModelosPorMarca,
     empresa,
+    cadastrarMoto,
   } = useApp();
 
   const [marcaSelecionada, setMarcaSelecionada] = useState("");
@@ -31,9 +32,11 @@ export default function CadastrarMotoForm() {
   const [ano, setAno] = useState("");
   const [placa, setPlaca] = useState("");
   const [cor, setCor] = useState("");
-  const [clienteId, setClienteId] = useState(""); // se for usado para vincular a cliente
+  const [chassi, setChassi] = useState("");
+  const [cliente_id, setClienteId] = useState(""); // se for usado para vincular a cliente
   const [clienteNome, setClienteNome] = useState(""); // se for usado para vincular a cliente
   const [anos, setAnos] = useState<number[]>([]);
+  const [imagem, setImagem] = useState("");
 
   useEffect(() => {
     if (!modeloAnosSelecinados) return;
@@ -103,11 +106,40 @@ export default function CadastrarMotoForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!empresa) return alert("Empresa não identificada");
+    if (!cliente_id) return alert("Selecione um cliente");
+    if (!modeloSelecionado) return alert("Selecione um modelo");
+    if (!marcaNomeSelecionada) return alert("Selecione uma marca");
 
-    // Salvar no Supabase ou outro backend aqui
-    alert(
-      `Nova moto: ${marcaNomeSelecionada} - ${modeloSelecionado} (${ano}) Placa: ${placa} do Cliente ${clienteNome}`
-    );
+    try {
+      await cadastrarMoto({
+        cliente_id,
+        placa,
+        cor,
+        ano,
+        chassi: chassi || "", // caso use optional
+        modelo: modeloSelecionado,
+        marca: marcaNomeSelecionada,
+        imagem: imagem || "", // se estiver usando imagem opcional
+      });
+
+      alert("Moto cadastrada com sucesso!");
+
+      // Limpa o formulário
+      setMarcaSelecionada("");
+      setMarcaNomeSelecionada("");
+      setModeloSelecionado("");
+      setModeloAnosSelecionados("");
+      setAno("");
+      setPlaca("");
+      setCor("");
+      setClienteId("");
+      setClienteNome("");
+      setAnos([]);
+      setChassi("");
+      setImagem("");
+    } catch (err: any) {
+      alert("Erro ao cadastrar moto: " + err.message);
+    }
   };
 
   return (
@@ -165,7 +197,7 @@ export default function CadastrarMotoForm() {
                 select
                 fullWidth
                 label="Cliente"
-                value={clienteId}
+                value={cliente_id}
                 onChange={handleClienteChange}
                 required
                 disabled={!clientes || clientes.length === 0}
@@ -212,6 +244,14 @@ export default function CadastrarMotoForm() {
                 label="Cor"
                 value={cor}
                 onChange={(e) => setCor(e.target.value)}
+              />
+            </Grid>
+            <Grid size={4}>
+              <TextField
+                fullWidth
+                label="Chassi"
+                value={chassi}
+                onChange={(e) => setChassi(e.target.value)}
               />
             </Grid>
 

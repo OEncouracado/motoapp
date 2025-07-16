@@ -14,6 +14,7 @@ import CadastrarClientesForm from "@/components/(Clientes)/CadastrarClientesForm
 import MenuMotos from "@/components/(Motos)/MenuMotos";
 import Dashb from "@/components/(Dashboard)/Dashboard";
 import CadastrarMotoForm from "@/components/(Motos)/CadastrarMotoForm";
+import MenuEstoque from "@/components/(Estoque)/MenuEstoque";
 
 // 🎨 Estilo base do Paper
 const Item = styled(Paper)(({ theme }) => ({
@@ -38,6 +39,7 @@ type EstadoMenus = {
     clientes: SubOpcao;
     motos: SubOpcao;
     ordemsServico: SubOpcao;
+    estoque: SubOpcao;
   };
 };
 
@@ -56,6 +58,7 @@ const estadoInicial: EstadoMenus = {
     clientes: "listar",
     motos: "listar",
     ordemsServico: "listar",
+    estoque: "listar",
   },
 };
 
@@ -79,13 +82,13 @@ function menuReducer(state: EstadoMenus, action: AcaoMenus): EstadoMenus {
 
 export default function Dashboard() {
   const [state, dispatch] = useReducer(menuReducer, estadoInicial);
-  const { carregando, empresa } = useApp();
+  const { carregando } = useApp();
 
   const { opcao, submenus } = state;
 
   const isListar =
     opcao !== "home" &&
-    ["clientes", "motos", "ordemsServico"].includes(opcao) &&
+    ["clientes", "motos", "ordemsServico", "estoque"].includes(opcao) &&
     submenus[opcao as keyof typeof submenus] === "listar";
 
   if (carregando) return <div>Carregando dados...</div>;
@@ -130,7 +133,11 @@ export default function Dashboard() {
                   OsMenuSelected={(op) => handleSetSubmenu("ordemsServico", op)}
                 />
               )}
-              {opcao === "estoque" && <div>Estoque</div>}
+              {opcao === "estoque" && (
+                <MenuEstoque
+                  EstoqueMenuSelected={(op) => handleSetSubmenu("estoque", op)}
+                />
+              )}
             </Item>
           </Grid>
 
@@ -160,7 +167,12 @@ export default function Dashboard() {
                   <div>Nova Ordem de Serviço</div>
                 )}
 
-              {opcao === "estoque" && <div>Estoque</div>}
+              {opcao === "estoque" && submenus.estoque === "listar" && (
+                <div>Estoque</div>
+              )}
+              {opcao === "estoque" && submenus.estoque === "nova" && (
+                <div>Estoque Nova</div>
+              )}
             </Item>
           </Grid>
 

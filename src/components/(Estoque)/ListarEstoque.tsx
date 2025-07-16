@@ -6,7 +6,6 @@ import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import { ptBR } from "@mui/x-data-grid/locales";
 import CachedIcon from "@mui/icons-material/Cached";
 import { useState } from "react";
-import FichaClienteModal from "./FichaClienteModal";
 
 export default function ListarClientes2() {
   const [clienteSelecionado, setClienteSelecionado] = useState();
@@ -16,7 +15,7 @@ export default function ListarClientes2() {
     setClienteSelecionado(params.row); // dados do cliente
     setModalAberta(true);
   };
-  const { clientes, carregando, motos, carregarSessao, usuario } = useApp();
+  const { clientes, carregando, carregarSessao, usuario } = useApp();
   const colunas: GridColDef[] = [
     { field: "nome", headerName: "Nome", flex: 1 },
     { field: "email", headerName: "E-mail", flex: 1 },
