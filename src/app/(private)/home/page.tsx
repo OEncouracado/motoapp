@@ -15,6 +15,7 @@ import MenuMotos from "@/components/(Motos)/MenuMotos";
 import Dashb from "@/components/(Dashboard)/Dashboard";
 import CadastrarMotoForm from "@/components/(Motos)/CadastrarMotoForm";
 import MenuEstoque from "@/components/(Estoque)/MenuEstoque";
+import ListarEstoque from "@/components/(Estoque)/ListarEstoque";
 
 // 🎨 Estilo base do Paper
 const Item = styled(Paper)(({ theme }) => ({
@@ -83,7 +84,6 @@ function menuReducer(state: EstadoMenus, action: AcaoMenus): EstadoMenus {
 export default function Dashboard() {
   const [state, dispatch] = useReducer(menuReducer, estadoInicial);
   const { carregando } = useApp();
-
   const { opcao, submenus } = state;
 
   const isListar =
@@ -168,7 +168,7 @@ export default function Dashboard() {
                 )}
 
               {opcao === "estoque" && submenus.estoque === "listar" && (
-                <div>Estoque</div>
+                <ListarEstoque />
               )}
               {opcao === "estoque" && submenus.estoque === "nova" && (
                 <div>Estoque Nova</div>

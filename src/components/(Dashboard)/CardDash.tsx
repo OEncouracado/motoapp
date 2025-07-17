@@ -37,23 +37,26 @@ const icones: Record<TipoItem, JSX.Element> = {
 };
 
 const cores: Record<TipoItem, string> = {
-  clientes: "#2196f3", // Azul
-  motos: "#4caf50", // Verde
-  ordemsServico: "#ff9800", // Laranja
-  estoque: "#9c27b0", // Roxo
-  relatorios: "#00bcd4", // Ciano
+  clientes: "#2196f3",
+  motos: "#4caf50",
+  ordemsServico: "#ff9800",
+  estoque: "#9c27b0",
+  relatorios: "#00bcd4",
 };
 
 export default function CardDash({ tipo, titulo, onClick }: CardDashProps) {
   const app = useApp();
 
-  // Mapeia dinamicamente o conteúdo com base na prop `tipo`
-  const dados =
-    tipo === "estoque"
-      ? (app.produtos ?? [])
-      : tipo in app
-        ? ((app as Record<string, unknown>)[tipo] ?? [])
-        : [];
+  // Mapeia os totais correspondentes ao tipo
+  const totais: Record<TipoItem, number | undefined> = {
+    clientes: app.totalClientes,
+    motos: app.totalMotos,
+    ordemsServico: app.totalOrdensServico,
+    estoque: app.totalProdutos,
+    relatorios: 0, // pode ser ajustado depois
+  };
+
+  const total = totais[tipo] ?? 0;
   const tituloCard = titulo || tipo.charAt(0).toUpperCase() + tipo.slice(1);
 
   return (
@@ -87,7 +90,7 @@ export default function CardDash({ tipo, titulo, onClick }: CardDashProps) {
             alignItems="center"
             mt={2}
           >
-            <Typography variant="h4">{dados.length}</Typography>
+            <Typography variant="h4">{total}</Typography>
             <Chip size="small" label="Atualizado" color="default" />
           </Stack>
         </CardContent>

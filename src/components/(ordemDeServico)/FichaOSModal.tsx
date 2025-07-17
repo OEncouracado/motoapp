@@ -23,6 +23,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import InfoIcon from "@mui/icons-material/Info";
 
 import { useApp } from "@/context/AppContext";
+import { useEffect } from "react";
 
 type Props = {
   aberto: boolean;
@@ -35,7 +36,20 @@ export default function FichaOrdemServicoModal({
   onFechar,
   ordemServicoId,
 }: Props) {
-  const { ordemsServico, clientes, motos } = useApp();
+  const {
+    ordemsServico,
+    clientes,
+    motos,
+    carregarOrdensServico,
+    carregarClientes,
+    carregarMotos,
+  } = useApp();
+
+  useEffect(() => {
+    if (!clientes || clientes.length === 0) carregarClientes();
+    if (!motos || motos.length === 0) carregarMotos();
+    if (!ordemsServico || ordemsServico.length === 0) carregarOrdensServico();
+  }, []);
 
   const os = ordemsServico?.find((os) => os.id === ordemServicoId);
   const cliente = clientes?.find((c) => c.id === os?.cliente_id);

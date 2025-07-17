@@ -1,4 +1,4 @@
-// ---------- IMPORTAÇÕES ----------
+// src/contexts/AppContext.tsx
 "use client";
 
 import {
@@ -10,7 +10,7 @@ import {
 } from "react";
 import { supabase } from "./supabase";
 
-// ---------- TIPAGENS ----------
+// ---------- Tipos ----------
 type Usuario = {
   id: string;
   email: string;
@@ -55,17 +55,6 @@ type Moto = {
   chassi?: string;
 };
 
-type NovaMoto = {
-  cliente_id: string;
-  marca: string;
-  modelo: string;
-  ano: string;
-  placa: string;
-  cor: string;
-  chassi: string;
-  imagem?: string;
-};
-
 type OrdemServico = {
   id: string;
   numero: number;
@@ -81,6 +70,20 @@ type OrdemServico = {
   criado_em?: string;
 };
 
+type Produto = {
+  id: string;
+  empresa_id: string;
+  nome: string;
+  codigo: string;
+  quantidade: number;
+  valor_compra: number;
+  valor_venda: number;
+  criado_em?: string;
+  descricao?: string;
+  unidade?: string;
+  categoria?: string;
+};
+
 type MarcaFipe = {
   id: string;
   brand: string;
@@ -92,31 +95,25 @@ type ModeloFipe = {
   years: string;
 };
 
-type Produtos = {
-  id: string;
-  empresa_id: string;
-  nome: string;
-  codigo: string;
-  quantidade: number;
-  valor_compra: number;
-  valor_venda: number;
-  criado_em?: string;
-  descricao?: string; // opcional
-  unidade?: string; // ex: "un", "kg", "litro"
-  categoria?: string; // ex: "Lubrificante", "Peça", etc.
+type NovaMoto = {
+  cliente_id: string;
+  marca: string;
+  modelo: string;
+  ano: string;
+  placa: string;
+  cor: string;
+  chassi: string;
+  imagem?: string;
 };
 
-// ---------- CONTEXTO ----------
+// ---------- Contexto ----------
 type AppContextType = {
   usuario: Usuario | null;
   empresa: Empresa | null;
-  clientes?: Cliente[];
-  motos?: Moto[];
-  ordemsServico?: OrdemServico[];
   carregando: boolean;
+  isLoggedIn: () => boolean;
   logIn: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
-  isLoggedIn: () => boolean;
   carregarSessao: () => Promise<void>;
   themeMode: "light" | "dark";
   toggleTheme: () => void;
@@ -124,43 +121,123 @@ type AppContextType = {
   modelos?: ModeloFipe[];
   carregarMarcas: () => Promise<void>;
   carregarModelosPorMarca: (marcaId: string) => Promise<void>;
-  cadastrarCliente: (novoCliente: NovoCliente) => Promise<void>;
-  cadastrarMoto: (novaMoto: NovaMoto) => Promise<void>;
-  produtos?: Produtos[];
+
+  // Totais
+  totalClientes: number;
+  totalMotos: number;
+  totalOrdensServico: number;
+  totalProdutos: number;
+  totalRelatorios: number;
+  carregarTotais: () => Promise<void>;
+
+  // Dados completos sob demanda
+  clientes?: Cliente[];
+  motos?: Moto[];
+  ordemsServico?: OrdemServico[];
+  produtos?: Produto[];
+  carregarClientes: () => Promise<void>;
+  carregarMotos: () => Promise<void>;
+  carregarOrdensServico: () => Promise<void>;
   carregarProdutos: () => Promise<void>;
+
+  //Cadastros
+  cadastrarMoto: (novaMoto: NovaMoto) => Promise<void>;
+  cadastrarCliente: (novoCliente: NovoCliente) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-
-type AppProviderProps = {
-  children: ReactNode;
-};
-
-// ---------- TOKEN DA API FIPE ----------
 const tokenIVTXT = process.env.NEXT_PUBLIC_INVERTEXTO_TOKEN;
 
-// ---------- PROVIDER DO CONTEXTO ----------
-export const AppProvider = ({ children }: AppProviderProps) => {
-  // ---------- STATES GLOBAIS ----------
+export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [motos, setMotos] = useState<Moto[]>([]);
-  const [produtos, setProdutos] = useState<Produtos[]>([]);
   const [ordemsServico, setOrdemsServico] = useState<OrdemServico[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+
+  const [totalClientes, setTotalClientes] = useState(0);
+  const [totalMotos, setTotalMotos] = useState(0);
+  const [totalOrdensServico, setTotalOrdensServico] = useState(0);
+  const [totalProdutos, setTotalProdutos] = useState(0);
+  const [totalRelatorios, setTotalRelatorios] = useState(0);
+
   const [carregando, setCarregando] = useState(true);
   const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
   const [marcas, setMarcas] = useState<MarcaFipe[]>([]);
   const [modelos, setModelos] = useState<ModeloFipe[]>([]);
 
-  // ---------- TEMA ----------
   const toggleTheme = () => {
     const newTheme = themeMode === "dark" ? "light" : "dark";
     setThemeMode(newTheme);
     localStorage.setItem("themeMode", newTheme);
   };
 
-  // ---------- API FIPE ----------
+  const contarRegistros = async (
+    tabela: string,
+    empresaId: string
+  ): Promise<number> => {
+    const { count, error } = await supabase
+      .from(tabela)
+      .select("*", { count: "exact", head: true })
+      .eq("empresa_id", empresaId);
+    if (error) return 0;
+    return count || 0;
+  };
+
+  const carregarTotais = async () => {
+    if (!empresa) return;
+    const [c, m, o, p, r] = await Promise.all([
+      contarRegistros("clientes", empresa.id),
+      contarRegistros("motos", empresa.id),
+      contarRegistros("ordens_servico", empresa.id),
+      contarRegistros("produtos", empresa.id),
+      contarRegistros("relatorios", empresa.id),
+    ]);
+    setTotalClientes(c);
+    setTotalMotos(m);
+    setTotalOrdensServico(o);
+    setTotalProdutos(p);
+    setTotalRelatorios(r);
+    console.log("Totais  :>> ", c, m, o, p, r);
+  };
+
+  const carregarClientes = async () => {
+    const { data, error } = await supabase
+      .from("clientes")
+      .select("id, nome, email, telefone, cpf, criado_em, endereco")
+      .eq("empresa_id", empresa?.id);
+    if (!error) setClientes(data ?? []);
+  };
+
+  const carregarMotos = async () => {
+    const { data, error } = await supabase
+      .from("motos")
+      .select("id, cliente_id, marca, modelo, ano, placa, cor, chassi")
+      .eq("empresa_id", empresa?.id);
+    if (!error) setMotos(data ?? []);
+  };
+
+  const carregarOrdensServico = async () => {
+    const { data, error } = await supabase
+      .from("ordens_servico")
+      .select(
+        "id, numero, empresa_id, cliente_id, moto_id, status, data_abertura, data_entrega_previsao, data_conclusao, observacoes, total, criado_em"
+      )
+      .eq("empresa_id", empresa?.id);
+    if (!error) setOrdemsServico(data ?? []);
+  };
+
+  const carregarProdutos = async () => {
+    const { data, error } = await supabase
+      .from("produtos")
+      .select(
+        "id, empresa_id, nome, codigo, quantidade, valor_compra, valor_venda, criado_em, descricao, unidade, categoria"
+      )
+      .eq("empresa_id", empresa?.id);
+    if (!error) setProdutos(data ?? []);
+  };
+
   const carregarMarcas = async () => {
     try {
       const res = await fetch(
@@ -185,15 +262,6 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     }
   };
 
-  // ---------- CARREGAR PREFERÊNCIA DE TEMA AO INICIAR ----------
-  useEffect(() => {
-    const saved = localStorage.getItem("themeMode");
-    if (saved === "light" || saved === "dark") {
-      setThemeMode(saved);
-    }
-  }, []);
-
-  // ---------- AUTENTICAÇÃO ----------
   const logIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -213,7 +281,6 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   const isLoggedIn = () => !!usuario;
 
-  // ---------- CARREGAR SESSÃO DO USUÁRIO LOGADO ----------
   const carregarSessao = async () => {
     setCarregando(true);
     try {
@@ -239,26 +306,6 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
       if (!empresaData) throw new Error("Empresa não encontrada");
 
-      const { data: clienteData } = await supabase
-        .from("clientes")
-        .select("id, nome, email, telefone, cpf, criado_em, endereco")
-        .eq("empresa_id", usuarioSistema.empresa_id);
-
-      const clienteIds = clienteData?.map((c) => c.id) || [];
-
-      const { data: motoData } = await supabase
-        .from("motos")
-        .select("id, cliente_id, marca, modelo, ano, placa, cor, chassi")
-        .in("cliente_id", clienteIds);
-
-      const { data: osData } = await supabase
-        .from("ordens_servico")
-        .select(
-          "id, numero, empresa_id, cliente_id, moto_id, status, data_abertura, data_entrega_previsao, data_conclusao, observacoes, total, criado_em"
-        )
-        .eq("empresa_id", usuarioSistema.empresa_id);
-
-      // Setar tudo no contexto
       setUsuario({
         id: usuarioId,
         email: userData.user.email ?? "",
@@ -267,29 +314,18 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         tipo: usuarioSistema.tipo,
       });
       setEmpresa(empresaData);
-      setClientes(clienteData ?? []);
-      setMotos(motoData ?? []);
-      setOrdemsServico(osData ?? []);
+
+      await carregarTotais();
     } catch (err) {
       console.error("Erro ao carregar sessão:", err);
       setUsuario(null);
       setEmpresa(null);
-      setClientes([]);
-      setMotos([]);
-      setOrdemsServico([]);
     } finally {
       setCarregando(false);
     }
   };
-
-  // ---------- CARREGAR SESSÃO AUTOMATICAMENTE ----------
-  useEffect(() => {
-    carregarSessao();
-  }, []);
   //---------- CADASTRAR CLIENTE ----------
-  const cadastrarCliente = async (
-    novoCliente: Omit<Cliente, "id" | "criado_em">
-  ) => {
+  const cadastrarCliente = async (novoCliente: NovoCliente) => {
     if (!empresa) return;
 
     const { data, error } = await supabase
@@ -302,58 +338,43 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       .single();
 
     if (error) throw new Error(error.message);
-
     // Atualiza o estado de clientes local
     setClientes((prev) => [...(prev ?? []), data]);
   };
+
   //---------- CADASTRAR MOTO ----------
   const cadastrarMoto = async (novaMoto: NovaMoto) => {
     if (!empresa) return;
 
     const { data, error } = await supabase
       .from("motos")
-      .insert([novaMoto])
+      .insert([{ ...novaMoto, empresa_id: empresa.id }]) // importante: precisa ser um array
       .select()
       .single();
 
     if (error) throw new Error(error.message);
 
-    // Atualiza o estado de motos local
     setMotos((prev) => [...(prev ?? []), data]);
   };
-  const carregarProdutos = async () => {
-    if (!empresa) return;
 
-    try {
-      const { data, error } = await supabase
-        .from("produtos")
-        .select(
-          "id, empresa_id, nome, codigo, quantidade, valor_compra, valor_venda, criado_em, descricao, unidade, categoria"
-        )
-        .eq("empresa_id", empresa.id);
+  useEffect(() => {
+    const saved = localStorage.getItem("themeMode");
+    if (saved === "light" || saved === "dark") setThemeMode(saved);
+  }, []);
 
-      if (error) throw new Error(error.message);
+  useEffect(() => {
+    carregarSessao();
+  }, []);
 
-      setProdutos(data ?? []);
-    } catch (err) {
-      console.error("Erro ao carregar produtos:", err);
-      setProdutos([]);
-    }
-  };
-
-  // ---------- PROVIDER ----------
   return (
     <AppContext.Provider
       value={{
-        isLoggedIn,
         usuario,
         empresa,
-        clientes,
-        motos,
-        ordemsServico,
         carregando,
         logIn,
         logOut,
+        isLoggedIn,
         carregarSessao,
         themeMode,
         toggleTheme,
@@ -361,10 +382,22 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         modelos,
         carregarMarcas,
         carregarModelosPorMarca,
-        cadastrarCliente,
-        cadastrarMoto,
+        totalClientes,
+        totalMotos,
+        totalOrdensServico,
+        totalProdutos,
+        totalRelatorios,
+        carregarTotais,
+        clientes,
+        motos,
+        ordemsServico,
         produtos,
+        carregarClientes,
+        carregarMotos,
+        carregarOrdensServico,
         carregarProdutos,
+        cadastrarMoto,
+        cadastrarCliente,
       }}
     >
       {children}
@@ -372,7 +405,6 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   );
 };
 
-// ---------- HOOK DE USO DO CONTEXTO ----------
 export const useApp = () => {
   const context = useContext(AppContext);
   if (!context) {

@@ -24,6 +24,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import PersonIcon from "@mui/icons-material/Person";
 import { useApp } from "@/context/AppContext";
+import { useEffect } from "react";
 
 type Cliente = {
   id: string;
@@ -46,8 +47,12 @@ export default function FichaClienteModal({
   onFechar,
   cliente,
 }: Props) {
-  const { motos, ordemsServico } = useApp();
-
+  const { motos, ordemsServico, carregarMotos, carregarOrdensServico } =
+    useApp();
+  useEffect(() => {
+    if (!motos || motos.length === 0) carregarMotos();
+    if (!ordemsServico || ordemsServico.length === 0) carregarOrdensServico();
+  }, []);
   const motosDoCliente = motos?.filter(
     (moto) => moto.cliente_id === cliente?.id
   );

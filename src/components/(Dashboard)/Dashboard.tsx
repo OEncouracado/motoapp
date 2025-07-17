@@ -1,5 +1,7 @@
 import { Grid, Paper, Typography } from "@mui/material";
 import CardDash from "./CardDash";
+import { useApp } from "@/context/AppContext";
+import { useEffect } from "react";
 
 type DashbProps = {
   handleSetOpcao: (
@@ -14,6 +16,11 @@ type DashbProps = {
 };
 
 export default function Dashb({ handleSetOpcao }: DashbProps) {
+  const { carregarTotais } = useApp();
+  useEffect(() => {
+    carregarTotais();
+  }, []);
+
   return (
     <Grid container spacing={2}>
       <Grid component={Paper} elevation={3} className="p-2 pt-3" size={12}>

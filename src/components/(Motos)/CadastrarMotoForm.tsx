@@ -16,6 +16,7 @@ import "./index.css";
 
 export default function CadastrarMotoForm() {
   const {
+    carregarClientes,
     clientes,
     marcas,
     modelos,
@@ -67,6 +68,11 @@ export default function CadastrarMotoForm() {
       carregarModelosPorMarca(marcaSelecionada); // carrega modelos da marca escolhida
     }
   }, [marcaSelecionada]);
+
+  useEffect(() => {
+    if (!clientes || clientes.length === 0) carregarClientes();
+  }, []);
+
   // console.log("marcas :>> ", marcas);
   // console.log("modelos :>> ", modelos);
   // console.log("marcaSelecionada :>> ", marcaSelecionada);

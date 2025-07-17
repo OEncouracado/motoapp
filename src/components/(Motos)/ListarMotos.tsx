@@ -5,9 +5,16 @@ import { Paper, Typography } from "@mui/material";
 import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import CachedIcon from "@mui/icons-material/Cached";
 import { ptBR } from "@mui/x-data-grid/locales";
+import { useEffect } from "react";
 
 export default function ListarMotos() {
-  const { clientes, carregando, motos, carregarSessao } = useApp();
+  const { clientes, carregando, motos, carregarMotos, carregarClientes } =
+    useApp();
+
+  useEffect(() => {
+    if (!clientes || clientes.length === 0) carregarClientes();
+    if (!motos || motos.length === 0) carregarMotos();
+  }, []);
 
   const colunas: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 1 },
@@ -39,7 +46,7 @@ export default function ListarMotos() {
         Motos
         <CachedIcon
           className="ms-2"
-          onClick={carregarSessao}
+          onClick={carregarMotos}
           style={{ cursor: "pointer" }}
         />
       </Typography>
@@ -50,6 +57,7 @@ export default function ListarMotos() {
         initialState={{ pagination: { paginationModel } }}
         pageSizeOptions={[5, 10, 20]}
         checkboxSelection
+        showToolbar
         disableRowSelectionOnClick
       />
     </Paper>

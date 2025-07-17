@@ -5,10 +5,14 @@ import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import { ptBR } from "@mui/x-data-grid/locales";
 import CachedIcon from "@mui/icons-material/Cached";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FichaClienteModal from "./FichaClienteModal";
 
 export default function ListarClientes2() {
+  const { clientes, carregando, carregarClientes, usuario } = useApp();
+  useEffect(() => {
+    if (!clientes || clientes.length === 0) carregarClientes();
+  }, []);
   const [clienteSelecionado, setClienteSelecionado] = useState();
   const [modalAberta, setModalAberta] = useState(false);
 
@@ -16,7 +20,6 @@ export default function ListarClientes2() {
     setClienteSelecionado(params.row); // dados do cliente
     setModalAberta(true);
   };
-  const { clientes, carregando, motos, carregarSessao, usuario } = useApp();
   const colunas: GridColDef[] = [
     { field: "nome", headerName: "Nome", flex: 1 },
     { field: "email", headerName: "E-mail", flex: 1 },
@@ -80,7 +83,7 @@ Excluir cliente: ${params.row.nome}`
           Clientes
           <CachedIcon
             className="ms-2"
-            onClick={carregarSessao}
+            onClick={carregarClientes}
             style={{ cursor: "pointer" }}
           />
         </Typography>

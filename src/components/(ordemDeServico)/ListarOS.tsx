@@ -5,16 +5,29 @@ import { Paper, Typography } from "@mui/material";
 import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import CachedIcon from "@mui/icons-material/Cached";
 import { ptBR } from "@mui/x-data-grid/locales";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FichaOrdemServicoModal from "./FichaOSModal";
 
 export default function ListarOS() {
+  const {
+    clientes,
+    carregando,
+    motos,
+    ordemsServico,
+    carregarOrdensServico,
+    carregarClientes,
+    carregarMotos,
+  } = useApp();
+  useEffect(() => {
+    if (!clientes || clientes.length === 0) carregarClientes();
+    if (!motos || motos.length === 0) carregarMotos();
+    if (!ordemsServico || ordemsServico.length === 0) carregarOrdensServico();
+  }, []);
   const [modalAberta, setModalAberta] = useState(false);
   const [osSelecionadaId, setOsSelecionadaId] = useState<string | null>(null);
-  const { clientes, carregando, motos, ordemsServico, carregarSessao } =
-    useApp();
 
   const handleAbrirModal = (id: string) => {
+    console.log("id :>> ", id);
     setOsSelecionadaId(id);
     setModalAberta(true);
   };
@@ -83,7 +96,7 @@ export default function ListarOS() {
           Ordens de Serviço
           <CachedIcon
             className="ms-2"
-            onClick={carregarSessao}
+            onClick={carregarOrdensServico}
             style={{ cursor: "pointer" }}
           />
         </Typography>
@@ -94,6 +107,7 @@ export default function ListarOS() {
           initialState={{ pagination: { paginationModel } }}
           pageSizeOptions={[5, 10, 20]}
           checkboxSelection
+          showToolbar
           disableRowSelectionOnClick
         />
       </Paper>
