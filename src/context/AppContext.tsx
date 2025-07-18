@@ -82,6 +82,8 @@ type Produto = {
   descricao?: string;
   unidade?: string;
   categoria?: string;
+  estoque_minimo?: number;
+  ultima_atualizacao?: string;
 };
 
 type MarcaFipe = {
@@ -232,7 +234,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase
       .from("produtos")
       .select(
-        "id, empresa_id, nome, codigo, quantidade, valor_compra, valor_venda, criado_em, descricao, unidade, categoria"
+        "id, empresa_id, nome, codigo, quantidade, valor_compra, valor_venda, criado_em, descricao, unidade, categoria, estoque_minimo, ultima_atualizacao"
       )
       .eq("empresa_id", empresa?.id);
     if (!error) setProdutos(data ?? []);

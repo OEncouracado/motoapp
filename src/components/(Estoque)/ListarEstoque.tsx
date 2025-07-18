@@ -28,8 +28,14 @@ export default function ListarEstoque() {
     { field: "valor_venda", headerName: "Preço", flex: 1 },
     { field: "descricao", headerName: "Descrição", flex: 1 },
     { field: "unidade", headerName: "Un", flex: 1 },
+    { field: "ultima_atualizacao", headerName: "Última Entrada", flex: 1 },
     { field: "categoria", headerName: "Categoria", flex: 1 },
-    { field: "criado_em", headerName: "produto desde:", type: "date", flex: 1 },
+    {
+      field: "criado_em",
+      headerName: "Data de Cadastro:",
+      type: "date",
+      flex: 1,
+    },
     {
       field: "actions",
       headerName: "Ações",
@@ -78,6 +84,9 @@ Excluir produto: ${params.row.nome}`
     descricao: produto.descricao ?? "-",
     unidade: produto.unidade ?? "-",
     categoria: produto.categoria ?? "-",
+    ultima_atualizacao: produto.ultima_atualizacao
+      ? new Date(produto.ultima_atualizacao)
+      : null,
     criado_em: produto.criado_em ? new Date(produto.criado_em) : null,
   }));
 
@@ -107,7 +116,7 @@ Excluir produto: ${params.row.nome}`
           showToolbar
         />
       </Paper>
-      {/* <FichaprodutoModal
+      {/* <FichaProdutoModal
         aberto={modalAberta}
         onFechar={() => setModalAberta(false)}
         produto={produtoSelecionado}
