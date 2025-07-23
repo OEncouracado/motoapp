@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 import FichaClienteModal from "./FichaClienteModal";
 
 export default function ListarClientes2() {
-  const { clientes, carregando, carregarClientes, usuario } = useApp();
+  const { clientes, carregando, carregarClientes, usuario, deletarRegistro } =
+    useApp();
   useEffect(() => {
     if (!clientes || clientes.length === 0) carregarClientes();
   }, []);
@@ -20,6 +21,19 @@ export default function ListarClientes2() {
     setClienteSelecionado(params.row); // dados do cliente
     setModalAberta(true);
   };
+
+  const handleDelete = async (id: string, nome: string) => {
+    const confirmado = confirm(`Tem certeza que deseja excluir ${nome}?`);
+    if (!confirmado) return;
+    try {
+      await deletarRegistro("clientes", id);
+      alert("Excluído com sucesso!");
+    } catch (error) {
+      alert("Erro ao excluir");
+      console.log("error :>> ", error);
+    }
+  };
+
   const colunas: GridColDef[] = [
     { field: "nome", headerName: "Nome", flex: 1 },
     { field: "email", headerName: "E-mail", flex: 1 },
@@ -44,12 +58,7 @@ export default function ListarClientes2() {
               <Button
                 variant="contained"
                 color="error"
-                onClick={() =>
-                  confirm(
-                    `Tem certeza? 
-Excluir cliente: ${params.row.nome}`
-                  )
-                }
+                onClick={() => handleDelete(String(params.id), params.row.nome)}
               >
                 Excluir
               </Button>

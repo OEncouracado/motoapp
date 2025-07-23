@@ -70,7 +70,7 @@ type OrdemServico = {
   criado_em?: string;
 };
 
-type Produto = {
+export type Produto = {
   id: string;
   empresa_id: string;
   nome: string;
@@ -107,7 +107,7 @@ type NovaMoto = {
   chassi: string;
   imagem?: string;
 };
-
+type Tabela = "clientes" | "motos" | "ordens_servico" | "produtos"; // adicione outras se quiser
 // ---------- Contexto ----------
 type AppContextType = {
   usuario: Usuario | null;
@@ -123,6 +123,18 @@ type AppContextType = {
   modelos?: ModeloFipe[];
   carregarMarcas: () => Promise<void>;
   carregarModelosPorMarca: (marcaId: string) => Promise<void>;
+  deletarRegistro: <T = any>(tabela: Tabela, id: string) => Promise<T | null>;
+  editarRegistro: <T = any>(
+    tabela: string,
+    id: string | number,
+    dados: Partial<T>,
+    campoId?: string
+  ) => Promise<T>;
+  buscarRegistroPorId: <T = any>(
+    tabela: string,
+    id: string | number,
+    campoId?: string
+  ) => Promise<T>;
 
   // Totais
   totalClientes: number;
@@ -364,6 +376,74 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (saved === "light" || saved === "dark") setThemeMode(saved);
   }, []);
 
+  const editarRegistro = async <T = any,>(
+    tabela: string,
+    id: string | number,
+    dados: Partial<T>,
+    campoId: string = "id"
+  ): Promise<T> => {
+    const { data, error } = await supabase
+      .from(tabela)
+      .update(dados)
+      .eq(campoId, id)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Erro ao editar ${tabela}: ${error.message}`);
+
+    return data;
+  };
+
+  const buscarRegistroPorId = async <T = any,>(
+    tabela: string,
+    id: string | number,
+    campoId: string = "id"
+  ): Promise<T> => {
+    const { data, error } = await supabase
+      .from(tabela)
+      .select("*")
+      .eq(campoId, id)
+      .single();
+
+    if (error) throw new Error(`Erro ao buscar ${tabela}: ${error.message}`);
+    return data;
+  };
+
+  const deletarRegistro = async <T = any,>(
+    tabela: string,
+    id: string
+  ): Promise<T | null> => {
+    const { data, error } = await supabase
+      .from(tabela)
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    // Atualiza o estado local, se necessário
+    switch (tabela) {
+      case "clientes":
+        setClientes((prev) => prev?.filter((item) => item.id !== id) ?? []);
+        break;
+      case "motos":
+        setMotos((prev) => prev?.filter((item) => item.id !== id) ?? []);
+        break;
+      case "ordens_servico":
+        setOrdemsServico(
+          (prev) => prev?.filter((item) => item.id !== id) ?? []
+        );
+        break;
+      case "produtos":
+        setProdutos((prev) => prev?.filter((item) => item.id !== id) ?? []);
+        break;
+      // Adicione mais conforme necessário
+    }
+
+    return data;
+  };
+
   useEffect(() => {
     carregarSessao();
   }, []);
@@ -400,6 +480,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         carregarProdutos,
         cadastrarMoto,
         cadastrarCliente,
+        deletarRegistro,
+        editarRegistro,
+        buscarRegistroPorId,
       }}
     >
       {children}

@@ -5,7 +5,10 @@ import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import { ptBR } from "@mui/x-data-grid/locales";
 import CachedIcon from "@mui/icons-material/Cached";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import ProdutoModal from "./ProdutoModal";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 export default function ListarEstoque() {
   const { produtos, carregarProdutos, carregando, usuario } = useApp();
@@ -13,13 +16,20 @@ export default function ListarEstoque() {
     if (!produtos || produtos.length === 0) carregarProdutos();
   }, []);
 
-  // const [produtoSelecionado, setprodutoSelecionado] = useState();
-  // const [modalAberta, setModalAberta] = useState(false);
+  const [produtoSelecionado, setprodutoSelecionado] = useState<Produto | null>(
+    null
+  );
 
-  // const handleRowClick = (params) => {
-  //   setprodutoSelecionado(params.row); // dados do produto
-  //   setModalAberta(true);
-  // };
+  const [modalAberta, setModalAberta] = useState(false);
+  console.log("produtoSelecionado :>> ", produtoSelecionado);
+  const handleRowClick = (params) => {
+    setprodutoSelecionado(params.id); // dados do produto
+    setModalAberta(true);
+  };
+  const handleFecharModal = () => {
+    setprodutoSelecionado(null);
+    setModalAberta(false);
+  };
 
   const colunas: GridColDef[] = [
     { field: "nome", headerName: "Nome", flex: 1 },
@@ -42,26 +52,27 @@ export default function ListarEstoque() {
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <Box component={Grid} container>
-          {/* <Grid size={usuario?.tipo === "admin" ? 6 : 12}>
-            <Button variant="contained" onClick={() => handleRowClick(params)}>
-              ver
-            </Button>
-          </Grid> */}
+        <Box component={Grid} spacing={2} container>
+          <Grid
+            component={Button}
+            size={usuario?.tipo === "admin" ? 6 : 12}
+            onClick={() => handleRowClick(params)}
+          >
+            <VisibilityIcon />
+          </Grid>
           {usuario?.tipo === "admin" ? (
-            <Grid size={6}>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() =>
-                  confirm(
-                    `Tem certeza? 
+            <Grid
+              component={Button}
+              color="#F44336"
+              onClick={() =>
+                confirm(
+                  `Tem certeza? 
 Excluir produto: ${params.row.nome}`
-                  )
-                }
-              >
-                Excluir
-              </Button>
+                )
+              }
+              size={6}
+            >
+              <DeleteIcon />
             </Grid>
           ) : (
             ""
@@ -116,11 +127,11 @@ Excluir produto: ${params.row.nome}`
           showToolbar
         />
       </Paper>
-      {/* <FichaProdutoModal
+      <ProdutoModal
         aberto={modalAberta}
-        onFechar={() => setModalAberta(false)}
-        produto={produtoSelecionado}
-      /> */}
+        onFechar={handleFecharModal}
+        produtoId={produtoSelecionado}
+      />
     </>
   );
 }
