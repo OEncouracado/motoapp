@@ -16,6 +16,7 @@ import Dashb from "@/components/(Dashboard)/Dashboard";
 import CadastrarMotoForm from "@/components/(Motos)/CadastrarMotoForm";
 import MenuEstoque from "@/components/(Estoque)/MenuEstoque";
 import ListarEstoque from "@/components/(Estoque)/ListarEstoque";
+import Footer from "@/components/Footer";
 
 // 🎨 Estilo base do Paper
 const Item = styled(Paper)(({ theme }) => ({
@@ -186,6 +187,7 @@ export default function Dashboard() {
           )}
         </Grid>
       </Box>
+      <Footer sx={{ my: 4 }} />
     </>
   );
 }
