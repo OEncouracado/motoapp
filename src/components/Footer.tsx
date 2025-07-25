@@ -1,11 +1,19 @@
 import * as React from "react";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 
 export default function Footer(props: any) {
   return (
-    <Box sx={{ height: "20rem", backgroundColor: "InfoText" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        height: "20rem",
+        // backgroundColor: "InfoText",
+      }}
+    >
       <Typography
         className="align-bottom"
         variant="body2"
@@ -13,15 +21,15 @@ export default function Footer(props: any) {
         sx={[
           {
             color: "text.secondary",
-            backgroundColor: "red",
+            // backgroundColor: "red",
             textAlign: "center",
           },
           ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
         ]}
       >
         {"Copyright © "}
-        <Link color="inherit" href="https://mui.com/">
-          Sitemark
+        <Link color="inherit" href="https://mavsleo.com.br/">
+          MavsLeo
         </Link>{" "}
         {new Date().getFullYear()}
         {"."}
