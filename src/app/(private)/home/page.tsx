@@ -17,6 +17,7 @@ import CadastrarMotoForm from "@/components/(Motos)/CadastrarMotoForm";
 import MenuEstoque from "@/components/(Estoque)/MenuEstoque";
 import ListarEstoque from "@/components/(Estoque)/ListarEstoque";
 import Footer from "@/components/Footer";
+import CriarNovaOrdem from "@/components/(ordemDeServico)/CriarNovaOrdem";
 
 // 🎨 Estilo base do Paper
 const Item = styled(Paper)(({ theme }) => ({
@@ -107,9 +108,14 @@ export default function Dashboard() {
   };
   console.log("opcao :>> ", opcao);
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
       <ResponsiveAppBar handleSetOpcao={handleSetOpcao} />
-
       <Box
         component={Container}
         sx={{ flexGrow: 1, padding: 2, maxWidth: "98dvw !important" }}
@@ -164,9 +170,7 @@ export default function Dashboard() {
               {opcao === "ordemsServico" &&
                 submenus.ordemsServico === "listar" && <ListarOS />}
               {opcao === "ordemsServico" &&
-                submenus.ordemsServico === "nova" && (
-                  <div>Nova Ordem de Serviço</div>
-                )}
+                submenus.ordemsServico === "nova" && <CriarNovaOrdem />}
 
               {opcao === "estoque" && submenus.estoque === "listar" && (
                 <ListarEstoque />
@@ -187,7 +191,7 @@ export default function Dashboard() {
           )}
         </Grid>
       </Box>
-      <Footer sx={{ my: 4 }} />
-    </>
+      <Footer sx={{ my: "1rem" }} />
+    </Box>
   );
 }

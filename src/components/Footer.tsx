@@ -5,15 +5,7 @@ import { Box } from "@mui/material";
 
 export default function Footer(props: any) {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        height: "20rem",
-        // backgroundColor: "InfoText",
-      }}
-    >
+    <Box>
       <Typography
         className="align-bottom"
         variant="body2"

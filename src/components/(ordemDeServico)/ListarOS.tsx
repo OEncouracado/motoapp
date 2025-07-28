@@ -1,7 +1,7 @@
 "use client";
 
 import { useApp } from "@/context/AppContext";
-import { Paper, Typography } from "@mui/material";
+import { Paper, Skeleton, Typography } from "@mui/material";
 import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import CachedIcon from "@mui/icons-material/Cached";
 import { ptBR } from "@mui/x-data-grid/locales";
@@ -17,19 +17,58 @@ export default function ListarOS() {
     carregarOrdensServico,
     carregarClientes,
     carregarMotos,
+    buscarItensComProdutos,
   } = useApp();
-  useEffect(() => {
+
+  const [modalAberta, setModalAberta] = useState(false);
+  const [osSelecionadaId, setOsSelecionadaId] = useState<string | null>(null);
+  const [totaisOrdens, setTotaisOrdens] = useState<Record<string, number>>({});
+  const [reloading, setReloading] = useState<boolean>(false);
+
+  const reload = async () => {
     if (!clientes || clientes.length === 0) carregarClientes();
     if (!motos || motos.length === 0) carregarMotos();
     if (!ordemsServico || ordemsServico.length === 0) carregarOrdensServico();
+  };
+  const calcularTotais = async () => {
+    if (!ordemsServico || ordemsServico.length === 0) return;
+
+    const novosTotais: Record<string, number> = {};
+
+    for (const os of ordemsServico) {
+      const itensLista = await buscarItensComProdutos(os.id);
+      const total = itensLista.reduce((soma, item) => {
+        const quantidade = item.quantidade ?? 0;
+        const valor = item.produtos.valor_venda ?? 0;
+        return soma + quantidade * valor;
+      }, 0);
+
+      novosTotais[os.id] = total;
+    }
+
+    setTotaisOrdens(novosTotais);
+  };
+
+  useEffect(() => {
+    reload();
   }, []);
-  const [modalAberta, setModalAberta] = useState(false);
-  const [osSelecionadaId, setOsSelecionadaId] = useState<string | null>(null);
+
+  useEffect(() => {
+    calcularTotais();
+  }, [ordemsServico]);
 
   const handleAbrirModal = (id: string) => {
-    console.log("id :>> ", id);
     setOsSelecionadaId(id);
     setModalAberta(true);
+  };
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+  const recarregar = async () => {
+    setReloading(true);
+    calcularTotais();
+    reload();
+    await delay(500); // aguarda 500ms
+    setReloading(false);
   };
 
   const colunas: GridColDef[] = [
@@ -82,7 +121,10 @@ export default function ListarOS() {
       : null,
     data_conclusao: os.data_conclusao ? new Date(os.data_conclusao) : null,
     observacoes: os.observacoes ?? "",
-    total: os.total ?? 0,
+    total: new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(totaisOrdens[os.id] ?? 0),
   }));
 
   const paginationModel = { page: 0, pageSize: 5 };
@@ -96,7 +138,7 @@ export default function ListarOS() {
           Ordens de Serviço
           <CachedIcon
             className="ms-2"
-            onClick={carregarOrdensServico}
+            onClick={recarregar}
             style={{ cursor: "pointer" }}
           />
         </Typography>
@@ -109,6 +151,7 @@ export default function ListarOS() {
           checkboxSelection
           showToolbar
           disableRowSelectionOnClick
+          loading={reloading} // <- Aqui ativa o modo de loading
         />
       </Paper>
       <FichaOrdemServicoModal

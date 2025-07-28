@@ -135,6 +135,9 @@ type AppContextType = {
     id: string | number,
     campoId?: string
   ) => Promise<T>;
+  buscarItensComProdutos: (
+    ordemServicoId: string
+  ) => Promise<any[] | undefined>;
 
   // Totais
   totalClientes: number;
@@ -409,6 +412,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return data;
   };
 
+  const buscarItensComProdutos = async (ordemServicoId: string) => {
+    if (!empresa) return;
+    if (!ordemServicoId) return [];
+    const { data, error } = await supabase
+      .from("itens_ordem_servico")
+      .select(
+        `
+      *,
+      produtos:produto_id (
+        id, nome, valor_venda
+      )
+    `
+      )
+      .eq("empresa_id", empresa.id)
+      .eq("ordem_servico_id", ordemServicoId);
+
+    if (error) throw new Error(error.message);
+
+    return data;
+  };
+
   const deletarRegistro = async <T = any,>(
     tabela: string,
     id: string
@@ -483,6 +507,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         deletarRegistro,
         editarRegistro,
         buscarRegistroPorId,
+        buscarItensComProdutos,
       }}
     >
       {children}
