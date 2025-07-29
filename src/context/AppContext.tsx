@@ -130,6 +130,7 @@ type AppContextType = {
     dados: Partial<T>,
     campoId?: string
   ) => Promise<T>;
+  cadastrarRegistro: <T = any>(tabela: string, dados: Partial<T>) => Promise<T>;
   buscarRegistroPorId: <T = any>(
     tabela: string,
     id: string | number,
@@ -378,7 +379,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const saved = localStorage.getItem("themeMode");
     if (saved === "light" || saved === "dark") setThemeMode(saved);
   }, []);
+  const cadastrarRegistro = async <T = any,>(
+    tabela: string,
+    dados: Partial<T>
+  ): Promise<T> => {
+    const { data, error } = await supabase
+      .from(tabela)
+      .insert(dados)
+      .select()
+      .single();
 
+    if (error)
+      throw new Error(`Erro ao cadastrar em ${tabela}: ${error.message}`);
+
+    return data;
+  };
   const editarRegistro = async <T = any,>(
     tabela: string,
     id: string | number,
@@ -506,6 +521,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         cadastrarCliente,
         deletarRegistro,
         editarRegistro,
+        cadastrarRegistro,
         buscarRegistroPorId,
         buscarItensComProdutos,
       }}
