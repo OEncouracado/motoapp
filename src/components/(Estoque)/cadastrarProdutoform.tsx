@@ -20,6 +20,7 @@ interface ProdutoNFe {
 
 export default function ProductForm() {
   const [produtos, setProdutos] = useState<ProdutoNFe[]>([]);
+  const [valor_venda, setValor_venda] = useState("");
 
   const handleXmlUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -113,7 +114,7 @@ export default function ProductForm() {
                     }
                   />
                 </Grid>
-                <Grid size={2}>
+                <Grid size={1}>
                   <TextField
                     fullWidth
                     type="number"
@@ -121,6 +122,16 @@ export default function ProductForm() {
                     value={produto.quantidade}
                     onChange={(e) =>
                       handleChangeProduto(i, "quantidade", e.target.value)
+                    }
+                  />
+                </Grid>
+                <Grid size={1}>
+                  <TextField
+                    fullWidth
+                    label="Unidade"
+                    value={produto.unidade}
+                    onChange={(e) =>
+                      handleChangeProduto(i, "unidade", e.target.value)
                     }
                   />
                 </Grid>
@@ -138,11 +149,10 @@ export default function ProductForm() {
                 <Grid size={2}>
                   <TextField
                     fullWidth
-                    label="Unidade"
-                    value={produto.unidade}
-                    onChange={(e) =>
-                      handleChangeProduto(i, "unidade", e.target.value)
-                    }
+                    type="number"
+                    label="Valor de Venda"
+                    value={valor_venda || produto.valor_unitario}
+                    onChange={(e) => setValor_venda(e)}
                   />
                 </Grid>
               </Grid>
