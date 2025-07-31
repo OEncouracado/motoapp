@@ -18,7 +18,7 @@ export default function ListarOS() {
     carregarOrdensServico,
     carregarClientes,
     carregarMotos,
-    carregarProdutos,
+    deletarRegistro,
     buscarItensComProdutos,
   } = useApp();
 
@@ -82,6 +82,20 @@ export default function ListarOS() {
     setReloading(false);
   };
 
+  const handleDelete = async (id: string, numero: number) => {
+    const confirmado = confirm(
+      `Tem certeza que deseja excluir a Ordem de serviço N° ${numero}?`
+    );
+    if (!confirmado) return;
+    try {
+      await deletarRegistro("ordens_servico", id);
+      alert("Excluído com sucesso!");
+    } catch (error) {
+      alert("Erro ao excluir");
+      console.log("error :>> ", error);
+    }
+  };
+
   const colunas: GridColDef[] = [
     { field: "num", headerName: "Ordem Nº", flex: 1 },
     { field: "cliente", headerName: "Cliente", flex: 1 },
@@ -114,6 +128,12 @@ export default function ListarOS() {
             onClick={() => handleAbrirModal(params.row.id)}
           >
             Ver OS
+          </button>
+          <button
+            className="btn btn-danger me-2"
+            onClick={() => handleDelete(String(params.row.id), params.row.num)}
+          >
+            Excluir
           </button>
         </div>
       ),

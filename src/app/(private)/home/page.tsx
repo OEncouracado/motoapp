@@ -18,6 +18,7 @@ import MenuEstoque from "@/components/(Estoque)/MenuEstoque";
 import ListarEstoque from "@/components/(Estoque)/ListarEstoque";
 import Footer from "@/components/Footer";
 import CriarNovaOrdem from "@/components/(ordemDeServico)/CriarNovaOrdem";
+import Entrada from "@/components/(Estoque)/entradaProduto";
 
 // 🎨 Estilo base do Paper
 const Item = styled(Paper)(({ theme }) => ({
@@ -176,7 +177,7 @@ export default function Dashboard() {
                 <ListarEstoque />
               )}
               {opcao === "estoque" && submenus.estoque === "nova" && (
-                <div>Estoque Nova</div>
+                <Entrada />
               )}
             </Item>
           </Grid>
