@@ -11,12 +11,14 @@ import FichaOrdemServicoModal from "./FichaOSModal";
 export default function ListarOS() {
   const {
     clientes,
+    produtos,
     carregando,
     motos,
     ordemsServico,
     carregarOrdensServico,
     carregarClientes,
     carregarMotos,
+    carregarProdutos,
     buscarItensComProdutos,
   } = useApp();
 
@@ -29,6 +31,14 @@ export default function ListarOS() {
     if (!clientes || clientes.length === 0) carregarClientes();
     if (!motos || motos.length === 0) carregarMotos();
     if (!ordemsServico || ordemsServico.length === 0) carregarOrdensServico();
+    if (!produtos || produtos.length === 0) carregarOrdensServico();
+  };
+
+  const renovar = async () => {
+    carregarClientes();
+    carregarMotos();
+    carregarOrdensServico();
+    carregarOrdensServico();
   };
   const calcularTotais = async () => {
     if (!ordemsServico || ordemsServico.length === 0) return;
@@ -39,7 +49,8 @@ export default function ListarOS() {
       const itensLista = await buscarItensComProdutos(os.id);
       const total = itensLista.reduce((soma, item) => {
         const quantidade = item.quantidade ?? 0;
-        const valor = item.produtos.valor_venda ?? 0;
+        const valor = item.produtos?.valor_venda ?? item.valor_unitario ?? 0;
+        console.log("item.produtos.valor_venda :>> ", item);
         return soma + quantidade * valor;
       }, 0);
 
@@ -66,7 +77,7 @@ export default function ListarOS() {
   const recarregar = async () => {
     setReloading(true);
     calcularTotais();
-    reload();
+    renovar();
     await delay(500); // aguarda 500ms
     setReloading(false);
   };

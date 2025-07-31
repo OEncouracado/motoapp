@@ -30,6 +30,7 @@ export default function CadastrarMotoForm() {
   const [marcaNomeSelecionada, setMarcaNomeSelecionada] = useState("");
   const [modeloSelecionado, setModeloSelecionado] = useState("");
   const [modeloAnosSelecinados, setModeloAnosSelecionados] = useState("");
+  const [modeloNomeSelecinado, setModeloNomeSelecionado] = useState("");
   const [ano, setAno] = useState("");
   const [placa, setPlaca] = useState("");
   const [cor, setCor] = useState("");
@@ -97,6 +98,7 @@ export default function CadastrarMotoForm() {
     if (!modelo) return;
 
     setModeloSelecionado(modelo.id); // Para buscar os modelos
+    setModeloNomeSelecionado(modelo.model);
     setModeloAnosSelecionados(modelo.years); // Para salvar no banco ou exibir
   };
   const handleClienteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +125,7 @@ export default function CadastrarMotoForm() {
         cor,
         ano,
         chassi: chassi || "", // caso use optional
-        modelo: modeloSelecionado,
+        modelo: modeloNomeSelecinado,
         marca: marcaNomeSelecionada,
         imagem: imagem || "", // se estiver usando imagem opcional
       });

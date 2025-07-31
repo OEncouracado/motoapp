@@ -116,7 +116,7 @@ export default function FichaOrdemServicoModal({
     <Dialog open={aberto} onClose={handleOnflechar} fullWidth maxWidth="sm">
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <BuildIcon color="primary" />
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Typography sx={{ flexGrow: 1 }}>
           Ordem de Serviço #{os.numero}
         </Typography>
         <Chip
@@ -203,7 +203,7 @@ export default function FichaOrdemServicoModal({
                   >
                     <Box>
                       <Typography variant="body1">
-                        Produto: {item.produtos.nome}
+                        Produto: {item.produtos?.nome ?? item.nome_manual}
                       </Typography>
                       <Box sx={{ display: "flex" }}>
                         <Typography
@@ -214,7 +214,10 @@ export default function FichaOrdemServicoModal({
                           Quantidade: {item.quantidade}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Unidade: {Reais(item.produtos.valor_venda)}
+                          Unidade:{" "}
+                          {Reais(
+                            item.produtos?.valor_venda ?? item.valor_unitario
+                          )}
                         </Typography>
                       </Box>
                       {/* Adicione outros campos que quiser mostrar */}
@@ -228,7 +231,7 @@ export default function FichaOrdemServicoModal({
                         valor:{" "}
                         {formatarPreco(
                           item.quantidade,
-                          item.produtos.valor_venda
+                          item.produtos?.valor_venda ?? item.valor_unitario
                         )}
                       </Typography>
                     </Box>

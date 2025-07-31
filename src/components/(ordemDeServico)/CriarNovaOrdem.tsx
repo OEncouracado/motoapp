@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Grid,
+  IconButton,
   MenuItem,
   TextField,
   Typography,
@@ -9,20 +10,32 @@ import {
 import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import CachedIcon from "@mui/icons-material/Cached";
+import ClearIcon from "@mui/icons-material/Clear";
+
+type Item = {
+  produto_id: string;
+  quantidade: number;
+  valor_unitario: number;
+  unidade?: string;
+  tipo?: "catalogo" | "manual";
+  nome_manual?: string;
+};
 
 export default function CriarNovaOrdem() {
   const {
-    usuario,
+    empresa,
     clientes,
     motos,
     produtos,
     cadastrarRegistro,
     carregarClientes,
     carregarMotos,
+    carregarProdutos,
   } = useApp();
   const reload = async () => {
     if (!clientes || clientes.length === 0) carregarClientes();
     if (!motos || motos.length === 0) carregarMotos();
+    if (!produtos || produtos.length === 0) carregarProdutos();
   };
   const [clienteId, setClienteId] = useState("");
   const [motoId, setMotoId] = useState("");
@@ -32,7 +45,6 @@ export default function CriarNovaOrdem() {
   >([]);
 
   const [motosFiltradas, setMotosFiltradas] = useState([]);
-  console.log("motos :>> ", motosFiltradas);
   useEffect(() => {
     reload();
   }, []);
@@ -45,21 +57,51 @@ export default function CriarNovaOrdem() {
   const handleAdicionarItem = () => {
     setItens((prev) => [
       ...prev,
-      { produto_id: "", quantidade: 1, valor_unitario: 0 },
+      {
+        produto_id: "",
+        quantidade: 1,
+        valor_unitario: 0,
+        tipo: "catalogo", // padrão
+        unidade: "Un",
+        nome_manual: "",
+      },
     ]);
+  };
+  const handleRemoverItem = (index: number) => {
+    const novos = [...itens];
+    novos.splice(index, 1);
+    setItens(novos);
   };
 
   const handleAlterarItem = (index: number, campo: string, valor: any) => {
     const novos = [...itens];
-    novos[index][campo] =
-      campo === "quantidade" || campo === "valor_unitario"
-        ? Number(valor)
-        : valor;
+    novos[index] = {
+      ...novos[index],
+      [campo]:
+        campo === "quantidade" || campo === "valor_unitario"
+          ? Number(valor)
+          : valor,
+    };
+
+    // Se for produto_id, atualiza valor e unidade
+    if (campo === "produto_id") {
+      novos[index].tipo = valor === "manual" ? "manual" : "catalogo";
+
+      if (valor === "manual") {
+        novos[index].valor_unitario = 0;
+        novos[index].unidade = "Un";
+      } else {
+        const produtoSelecionado = produtos.find((p) => p.id === valor);
+        novos[index].valor_unitario = produtoSelecionado?.valor_venda || 0;
+        novos[index].unidade = produtoSelecionado?.unidade || "Un";
+      }
+    }
+
     setItens(novos);
   };
 
   const handleSalvar = async () => {
-    if (!usuario?.empresa_id) return alert("Empresa não encontrada");
+    if (!empresa) return alert("Empresa não encontrada");
 
     try {
       // 1. Cadastrar ordem de serviço
@@ -67,7 +109,7 @@ export default function CriarNovaOrdem() {
         cliente_id: clienteId,
         moto_id: motoId,
         observacoes,
-        empresa_id: usuario.empresa_id,
+        empresa_id: empresa.id,
         status: "aberta",
         data_abertura: new Date().toISOString(),
       });
@@ -76,14 +118,21 @@ export default function CriarNovaOrdem() {
       for (const item of itens) {
         await cadastrarRegistro("itens_ordem_servico", {
           ordem_servico_id: novaOS.id,
-          produto_id: item.produto_id,
+          produto_id: item.produto_id === "manual" ? null : item.produto_id,
+          nome_manual: item.tipo === "manual" ? item.nome_manual : null,
           quantidade: item.quantidade,
           valor_unitario: item.valor_unitario,
-          empresa_id: usuario.empresa_id,
+          empresa_id: empresa.id,
         });
       }
 
       alert("Ordem de Serviço criada com sucesso!");
+      // ✅ Limpar o formulário
+      setClienteId("");
+      setMotoId("");
+      setObservacoes("");
+      setItens([]);
+      setMotosFiltradas([]);
     } catch (error: any) {
       alert(`Erro: ${error.message}`);
     }
@@ -153,7 +202,7 @@ export default function CriarNovaOrdem() {
           <Typography variant="subtitle1">Produtos / Itens</Typography>
           {itens.map((item, index) => (
             <Grid container spacing={1} key={index} sx={{ mt: 1 }}>
-              <Grid size={6}>
+              <Grid size={item.tipo === "manual" ? 3 : 6}>
                 <TextField
                   select
                   label="Produto"
@@ -163,6 +212,7 @@ export default function CriarNovaOrdem() {
                   }
                   fullWidth
                 >
+                  <MenuItem value="manual">Produto Manual</MenuItem>
                   {produtos.map((p) => (
                     <MenuItem key={p.id} value={p.id}>
                       {p.nome}
@@ -170,7 +220,23 @@ export default function CriarNovaOrdem() {
                   ))}
                 </TextField>
               </Grid>
-              <Grid size={3}>
+
+              {/* Nome Manual */}
+              {item.tipo === "manual" && (
+                <Grid size={3}>
+                  <TextField
+                    type="text"
+                    label="Nome do Produto Manual"
+                    value={item.nome_manual}
+                    onChange={(e) =>
+                      handleAlterarItem(index, "nome_manual", e.target.value)
+                    }
+                    fullWidth
+                  />
+                </Grid>
+              )}
+
+              <Grid size={1}>
                 <TextField
                   type="number"
                   label="Qtd"
@@ -181,7 +247,20 @@ export default function CriarNovaOrdem() {
                   fullWidth
                 />
               </Grid>
-              <Grid size={3}>
+
+              <Grid size={1}>
+                <TextField
+                  type="text"
+                  label="Un"
+                  value={item.unidade}
+                  inputProps={{
+                    readOnly: item.tipo === "manual" ? false : true,
+                  }}
+                  fullWidth
+                />
+              </Grid>
+
+              <Grid size={2}>
                 <TextField
                   type="number"
                   label="Valor"
@@ -190,13 +269,30 @@ export default function CriarNovaOrdem() {
                     handleAlterarItem(index, "valor_unitario", e.target.value)
                   }
                   fullWidth
+                />
+              </Grid>
+
+              <Grid size={1}>
+                <TextField
+                  type="number"
+                  label="Total"
+                  value={item.quantidade * item.valor_unitario}
+                  inputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid
+                container
+                sx={{ justifyContent: "center", alignItems: "center" }}
+                size={1}
+              >
+                <IconButton
+                  title="Remover Item"
+                  onClick={() => handleRemoverItem(index)}
+                  color="error"
                 >
-                  {produtos.map((p) => (
-                    <MenuItem key={p.id} value={p.valor_venda}>
-                      {p.valor_venda}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                  <ClearIcon />
+                </IconButton>
               </Grid>
             </Grid>
           ))}
