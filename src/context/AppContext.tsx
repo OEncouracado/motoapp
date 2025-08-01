@@ -107,11 +107,28 @@ type NovaMoto = {
   chassi: string;
   imagem?: string;
 };
+type Endereco = {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  unidade: string;
+  bairro: string;
+  localidade: string; // cidade
+  uf: string; // sigla do estado (ex: SP)
+  estado: string; // nome do estado (ex: São Paulo)
+  regiao: string; // ex: Sudeste
+  ibge: string; // código IBGE do município
+  gia: string; // código GIA
+  ddd: string; // código DDD
+  siafi: string; // código SIAFI
+};
+
 type Tabela = "clientes" | "motos" | "ordens_servico" | "produtos"; // adicione outras se quiser
 // ---------- Contexto ----------
 type AppContextType = {
   usuario: Usuario | null;
   empresa: Empresa | null;
+  endereco: Endereco | null;
   carregando: boolean;
   isLoggedIn: () => boolean;
   logIn: (email: string, password: string) => Promise<void>;
@@ -139,6 +156,7 @@ type AppContextType = {
   buscarItensComProdutos: (
     ordemServicoId: string
   ) => Promise<any[] | undefined>;
+  buscarPorCEP: (cep: string) => Promise<void>;
 
   // Totais
   totalClientes: number;
@@ -184,6 +202,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
   const [marcas, setMarcas] = useState<MarcaFipe[]>([]);
   const [modelos, setModelos] = useState<ModeloFipe[]>([]);
+  const [endereco, setEndereco] = useState("");
 
   const toggleTheme = () => {
     const newTheme = themeMode === "dark" ? "light" : "dark";
@@ -374,11 +393,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     setMotos((prev) => [...(prev ?? []), data]);
   };
-
   useEffect(() => {
     const saved = localStorage.getItem("themeMode");
     if (saved === "light" || saved === "dark") setThemeMode(saved);
   }, []);
+
+  //---------- CADASTRAR Registro ----------
   const cadastrarRegistro = async <T = any,>(
     tabela: string,
     dados: Partial<T>
@@ -394,6 +414,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     return data;
   };
+
   const editarRegistro = async <T = any,>(
     tabela: string,
     id: string | number,
@@ -483,6 +504,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return data;
   };
 
+  //---------- BUSCAR POR CEP ----------
+  const buscarPorCEP = async (cep: string) => {
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+
+      if (data.erro) {
+        console.error("CEP não encontrado");
+        return;
+      }
+
+      setEndereco(data); // aqui você define o estado com os dados
+    } catch (error: unknown) {
+      console.error("Erro ao carregar Endereço:", error);
+    }
+  };
+
   useEffect(() => {
     carregarSessao();
   }, []);
@@ -524,6 +562,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         cadastrarRegistro,
         buscarRegistroPorId,
         buscarItensComProdutos,
+        buscarPorCEP,
+        endereco,
       }}
     >
       {children}

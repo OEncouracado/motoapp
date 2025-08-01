@@ -1,16 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import { TextField, Button, Paper, Stack, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import {
+  TextField,
+  Button,
+  Paper,
+  Stack,
+  Typography,
+  Box,
+} from "@mui/material";
 import { useApp } from "@/context/AppContext";
 
 export default function CadastrarClientesForm() {
-  const { cadastrarCliente } = useApp();
+  const { cadastrarCliente, buscarPorCEP, endereco } = useApp();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [cpf, setCpf] = useState("");
-  const [endereco, setEndereco] = useState("");
+  // const [endereco, setEndereco] = useState("");
+  const [enderecoCEP, setEnderecoCEP] = useState("");
+
+  useEffect(() => {
+    if (enderecoCEP) {
+      const buscar = async () => {
+        await buscarPorCEP(enderecoCEP); // carrega modelos da marca escolhida
+        console.log("object :>> ", endereco);
+      };
+      buscar();
+    }
+  }, [enderecoCEP]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,16 +76,29 @@ export default function CadastrarClientesForm() {
             value={cpf}
             onChange={(e) => setCpf(e.target.value)}
           />
-          <TextField
+          {/* <TextField
             label="Endereço"
             value={endereco}
             onChange={(e) => setEndereco(e.target.value)}
-          />
+          /> */}
+          <Box>
+            <TextField
+              label="Logradouro"
+              value={endereco?.logradouro || ""}
+              slotProps={{ input: { readOnly: true } }}
+            />
+          </Box>
           <Button variant="contained" type="submit">
             Cadastrar
           </Button>
         </Stack>
       </form>
+      <TextField
+        label="CEP"
+        type="number"
+        value={enderecoCEP}
+        onChange={(e) => setEnderecoCEP(e.target.value)}
+      ></TextField>
     </Paper>
   );
 }
