@@ -23,8 +23,8 @@ export default function CadastrarClientesForm() {
   useEffect(() => {
     if (enderecoCEP) {
       const buscar = async () => {
-        await buscarPorCEP(enderecoCEP); // carrega modelos da marca escolhida
-        console.log("object :>> ", endereco);
+        await buscarPorCEP(enderecoCEP);
+        console.log("Endereço :>> ", endereco);
       };
       buscar();
     }
@@ -33,14 +33,21 @@ export default function CadastrarClientesForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await cadastrarCliente({ nome, email, telefone, cpf, endereco });
+      await cadastrarCliente({
+        nome,
+        email,
+        telefone,
+        cpf,
+        endereco: enderecoCEP,
+      });
       alert("Cliente cadastrado com sucesso!");
       // Limpa o formulário
       setNome("");
       setEmail("");
       setTelefone("");
       setCpf("");
-      setEndereco("");
+      // setEndereco("");
+      setEnderecoCEP("");
     } catch (err: any) {
       alert("Erro ao cadastrar cliente: " + err.message);
     }
@@ -81,10 +88,36 @@ export default function CadastrarClientesForm() {
             value={endereco}
             onChange={(e) => setEndereco(e.target.value)}
           /> */}
+          <TextField
+            label="CEP"
+            type="number"
+            value={enderecoCEP}
+            onChange={(e) => setEnderecoCEP(e.target.value)}
+          />
           <Box>
             <TextField
               label="Logradouro"
               value={endereco?.logradouro || ""}
+              slotProps={{ input: { readOnly: true } }}
+            />
+            <TextField
+              label="Numero"
+              value={endereco?.unidade || ""}
+              // slotProps={{ input: { readOnly: true } }}
+            />
+            <TextField
+              label="Complemento"
+              value={endereco?.complemento || ""}
+              // slotProps={{ input: { readOnly: true } }}
+            />
+            <TextField
+              label="Bairro"
+              value={endereco?.bairro || ""}
+              slotProps={{ input: { readOnly: true } }}
+            />
+            <TextField
+              label="UF"
+              value={endereco?.uf || ""}
               slotProps={{ input: { readOnly: true } }}
             />
           </Box>
@@ -93,12 +126,6 @@ export default function CadastrarClientesForm() {
           </Button>
         </Stack>
       </form>
-      <TextField
-        label="CEP"
-        type="number"
-        value={enderecoCEP}
-        onChange={(e) => setEnderecoCEP(e.target.value)}
-      ></TextField>
     </Paper>
   );
 }
