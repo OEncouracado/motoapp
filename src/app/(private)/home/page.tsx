@@ -116,7 +116,11 @@ export default function Dashboard() {
         minHeight: "100vh",
       }}
     >
-      <ResponsiveAppBar handleSetOpcao={handleSetOpcao} />
+      <ResponsiveAppBar
+        handleSetOpcao={(opcao: string) =>
+          handleSetOpcao(opcao as OpcaoPrincipal)
+        }
+      />
       <Box
         component={Container}
         sx={{ flexGrow: 1, padding: 2, maxWidth: "98dvw !important" }}
