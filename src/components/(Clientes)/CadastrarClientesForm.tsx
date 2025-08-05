@@ -96,6 +96,7 @@ export default function CadastrarClientesForm() {
           />
           <Box>
             <TextField
+              className="me-1"
               label="Logradouro"
               value={endereco?.logradouro || ""}
               slotProps={{ input: { readOnly: true } }}
@@ -106,6 +107,7 @@ export default function CadastrarClientesForm() {
               // slotProps={{ input: { readOnly: true } }}
             />
             <TextField
+              className="mx-1"
               label="Complemento"
               value={endereco?.complemento || ""}
               // slotProps={{ input: { readOnly: true } }}
@@ -116,6 +118,7 @@ export default function CadastrarClientesForm() {
               slotProps={{ input: { readOnly: true } }}
             />
             <TextField
+              className="ms-1"
               label="UF"
               value={endereco?.uf || ""}
               slotProps={{ input: { readOnly: true } }}
