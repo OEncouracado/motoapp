@@ -46,7 +46,20 @@ export default function FichaOrdemServicoModal({
     carregarMotos,
     buscarItensComProdutos,
   } = useApp();
-  const [itensList, setItens] = useState([]);
+  // Defina um tipo apropriado para os itens, por exemplo:
+  type ItemComProduto = {
+    id: string;
+    quantidade: number;
+    valor_unitario?: number;
+    nome_manual?: string;
+    produtos?: {
+      nome?: string;
+      valor_venda?: number;
+    };
+    // adicione outros campos conforme necessário
+  };
+
+  const [itensList, setItens] = useState<ItemComProduto[]>([]);
   const [totaisOrdens, setTotaisOrdens] = useState<Record<string, number>>({});
   useEffect(() => {
     if (!clientes || clientes.length === 0) carregarClientes();
@@ -55,8 +68,9 @@ export default function FichaOrdemServicoModal({
     if (!itensList || itensList.length === 0) carregarItensArray();
   }, []);
   const carregarItensArray = async () => {
+    if (!ordemServicoId) return;
     const itensArray = await buscarItensComProdutos(ordemServicoId);
-    setItens(itensArray);
+    setItens(itensArray ?? []);
   };
   useEffect(() => {
     if (!itensList || itensList.length === 0) carregarItensArray();
@@ -95,7 +109,7 @@ export default function FichaOrdemServicoModal({
     if (!ordemServicoId) return;
 
     const itensLista = await buscarItensComProdutos(ordemServicoId);
-    const total = itensLista.reduce((soma, item) => {
+    const total = (itensLista ?? []).reduce((soma, item) => {
       const quantidade = item.quantidade ?? 0;
       const valor = item.valor_unitario ?? item.produtos?.valor_venda ?? 0;
       return soma + quantidade * valor;
@@ -216,7 +230,9 @@ export default function FichaOrdemServicoModal({
                         <Typography variant="body2" color="text.secondary">
                           Unidade:{" "}
                           {Reais(
-                            item.produtos?.valor_venda ?? item.valor_unitario
+                            item.produtos?.valor_venda ??
+                              item.valor_unitario ??
+                              0
                           )}
                         </Typography>
                       </Box>
@@ -231,7 +247,7 @@ export default function FichaOrdemServicoModal({
                         valor:{" "}
                         {formatarPreco(
                           item.quantidade,
-                          item.produtos?.valor_venda ?? item.valor_unitario
+                          item.produtos?.valor_venda ?? item.valor_unitario ?? 0
                         )}
                       </Typography>
                     </Box>
@@ -261,7 +277,7 @@ export default function FichaOrdemServicoModal({
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              }).format(totaisOrdens[ordemServicoId] || 0)}
+              }).format(ordemServicoId ? totaisOrdens[ordemServicoId] || 0 : 0)}
             </Typography>
           </Box>
         </Stack>

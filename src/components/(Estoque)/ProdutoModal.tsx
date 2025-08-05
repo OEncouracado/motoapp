@@ -10,9 +10,31 @@ import {
 import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 
-export default function ProdutoModal({ aberto, onFechar, produtoId }) {
+type ProdutoModalProps = {
+  aberto: boolean;
+  onFechar: () => void;
+  produtoId: number | string | null; // ou `string?`, se for opcional
+};
+
+export default function ProdutoModal({
+  aberto,
+  onFechar,
+  produtoId,
+}: ProdutoModalProps) {
   const { buscarRegistroPorId, editarRegistro, carregarProdutos } = useApp();
-  const [form, setForm] = useState(null);
+  type Produto = {
+    id: number | string;
+    nome: string;
+    codigo: string;
+    quantidade: number;
+    valor_venda: number;
+    descricao: string;
+    unidade: string;
+    categoria: string;
+    [key: string]: any; // permite propriedades adicionais se necessário
+  };
+
+  const [form, setForm] = useState<Produto | null>(null);
   const [modoEdicao, setModoEdicao] = useState(false);
 
   useEffect(() => {
@@ -31,14 +53,17 @@ export default function ProdutoModal({ aberto, onFechar, produtoId }) {
   const handleCancelar = () => setModoEdicao(false);
 
   const handleSalvar = async () => {
+    if (!form) return;
     await editarRegistro("produtos", form.id, form);
     await carregarProdutos();
     setModoEdicao(false);
     onFechar();
   };
 
-  const handleChange = (e) =>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!form) return;
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   if (!form) return null;
 

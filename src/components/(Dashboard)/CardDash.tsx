@@ -1,4 +1,5 @@
 import React from "react";
+import type { ReactElement } from "react";
 import { useApp } from "@/context/AppContext";
 import {
   Button,
@@ -27,8 +28,7 @@ type CardDashProps = {
   titulo?: string;
   onClick?: () => void;
 };
-
-const icones: Record<TipoItem, JSX.Element> = {
+const icones: Record<TipoItem, ReactElement> = {
   clientes: <PeopleAltIcon fontSize="large" color="primary" />,
   motos: <TwoWheelerIcon fontSize="large" color="success" />,
   ordemsServico: <BuildCircleIcon fontSize="large" color="warning" />,

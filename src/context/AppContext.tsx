@@ -14,8 +14,8 @@ import { supabase } from "./supabase";
 type Usuario = {
   id: string;
   email: string;
-  nome: string;
-  sobrenome: string;
+  nome?: string;
+  sobrenome?: string;
   tipo?: "admin" | "funcionario";
 };
 
@@ -202,7 +202,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
   const [marcas, setMarcas] = useState<MarcaFipe[]>([]);
   const [modelos, setModelos] = useState<ModeloFipe[]>([]);
-  const [endereco, setEndereco] = useState("");
+  const [endereco, setEndereco] = useState<Endereco | null>(null);
 
   const toggleTheme = () => {
     const newTheme = themeMode === "dark" ? "light" : "dark";
@@ -515,12 +515,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      setEndereco(data); // aqui você define o estado com os dados
+      const enderecoAdaptado: Endereco = {
+        cep: data.cep || "",
+        logradouro: data.logradouro || "",
+        complemento: data.complemento || "",
+        unidade: "", // não vem da API
+        bairro: data.bairro || "",
+        localidade: data.localidade || "",
+        uf: data.uf || "",
+        estado: "", // não vem da API
+        regiao: "", // não vem da API
+        ibge: data.ibge || "",
+        gia: data.gia || "",
+        ddd: data.ddd || "",
+        siafi: data.siafi || "",
+      };
+
+      setEndereco(enderecoAdaptado);
     } catch (error: unknown) {
       console.error("Erro ao carregar Endereço:", error);
     }
   };
-
   useEffect(() => {
     carregarSessao();
   }, []);

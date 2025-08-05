@@ -14,11 +14,11 @@ export default function ListarClientes2() {
   useEffect(() => {
     if (!clientes || clientes.length === 0) carregarClientes();
   }, []);
-  const [clienteSelecionado, setClienteSelecionado] = useState();
+  const [clienteSelecionado, setClienteSelecionado] = useState(null);
   const [modalAberta, setModalAberta] = useState(false);
 
-  const handleRowClick = (params) => {
-    setClienteSelecionado(params.row); // dados do cliente
+  const handleRowClick = (row: any) => {
+    setClienteSelecionado(row); // dados do cliente
     setModalAberta(true);
   };
 
@@ -49,7 +49,10 @@ export default function ListarClientes2() {
       renderCell: (params) => (
         <Box component={Grid} container>
           <Grid size={usuario?.tipo === "admin" ? 6 : 12}>
-            <Button variant="contained" onClick={() => handleRowClick(params)}>
+            <Button
+              variant="contained"
+              onClick={() => handleRowClick(params.row)}
+            >
               ver
             </Button>
           </Grid>

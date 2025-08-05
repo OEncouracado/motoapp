@@ -11,9 +11,9 @@ import {
   Alert,
 } from "@mui/material";
 import { ChangeEvent, useState } from "react";
-import { parseString } from "xml2js";
-import { createClient } from "@supabase/supabase-js";
+
 import { useApp } from "@/context/AppContext";
+import { parseString } from "xml2js";
 
 interface ProdutoNFe {
   nome: string;

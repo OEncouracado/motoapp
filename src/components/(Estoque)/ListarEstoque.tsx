@@ -2,7 +2,12 @@
 
 import { useApp } from "@/context/AppContext";
 import { Box, Button, Grid, Paper, Typography } from "@mui/material";
-import { GridColDef, DataGrid } from "@mui/x-data-grid";
+import {
+  GridColDef,
+  DataGrid,
+  GridRowParams,
+  GridRenderCellParams,
+} from "@mui/x-data-grid";
 import { ptBR } from "@mui/x-data-grid/locales";
 import CachedIcon from "@mui/icons-material/Cached";
 import { useEffect, useState } from "react";
@@ -16,13 +21,13 @@ export default function ListarEstoque() {
     if (!produtos || produtos.length === 0) carregarProdutos();
   }, []);
 
-  const [produtoSelecionado, setprodutoSelecionado] = useState<Produto | null>(
-    null
-  );
+  const [produtoSelecionado, setprodutoSelecionado] = useState<
+    string | number | null
+  >(null);
 
   const [modalAberta, setModalAberta] = useState(false);
   console.log("produtoSelecionado :>> ", produtoSelecionado);
-  const handleRowClick = (params) => {
+  const handleRowClick = (params: GridRowParams) => {
     setprodutoSelecionado(params.id); // dados do produto
     setModalAberta(true);
   };
@@ -51,12 +56,12 @@ export default function ListarEstoque() {
       headerName: "Ações",
       flex: 1,
       sortable: false,
-      renderCell: (params) => (
+      renderCell: (params: GridRenderCellParams) => (
         <Box component={Grid} spacing={2} container>
           <Grid
             component={Button}
             size={usuario?.tipo === "admin" ? 6 : 12}
-            onClick={() => handleRowClick(params)}
+            onClick={() => handleRowClick(params as unknown as GridRowParams)}
           >
             <VisibilityIcon />
           </Grid>

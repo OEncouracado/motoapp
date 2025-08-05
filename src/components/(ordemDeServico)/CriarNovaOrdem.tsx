@@ -40,16 +40,18 @@ export default function CriarNovaOrdem() {
   const [clienteId, setClienteId] = useState("");
   const [motoId, setMotoId] = useState("");
   const [observacoes, setObservacoes] = useState("");
-  const [itens, setItens] = useState<
-    { produto_id: string; quantidade: number; valor_unitario: number }[]
-  >([]);
+  const [itens, setItens] = useState<Item[]>([]);
 
-  const [motosFiltradas, setMotosFiltradas] = useState([]);
+  const [motosFiltradas, setMotosFiltradas] = useState<
+    typeof motos extends (infer U)[] ? U[] : any[]
+  >([]);
   useEffect(() => {
     reload();
   }, []);
   useEffect(() => {
-    const filtradas = motos.filter((m) => m.cliente_id === clienteId);
+    const filtradas = motos
+      ? motos.filter((m) => m.cliente_id === clienteId)
+      : [];
     setMotoId(""); // reseta a seleção de moto
     setMotosFiltradas(filtradas);
   }, [clienteId, motos]);
@@ -91,7 +93,9 @@ export default function CriarNovaOrdem() {
         novos[index].valor_unitario = 0;
         novos[index].unidade = "Un";
       } else {
-        const produtoSelecionado = produtos.find((p) => p.id === valor);
+        const produtoSelecionado = produtos
+          ? produtos.find((p) => p.id === valor)
+          : undefined;
         novos[index].valor_unitario = produtoSelecionado?.valor_venda || 0;
         novos[index].unidade = produtoSelecionado?.unidade || "Un";
       }
@@ -105,14 +109,14 @@ export default function CriarNovaOrdem() {
 
     try {
       // 1. Cadastrar ordem de serviço
-      const novaOS = await cadastrarRegistro("ordens_servico", {
+      const novaOS = (await cadastrarRegistro("ordens_servico", {
         cliente_id: clienteId,
         moto_id: motoId,
         observacoes,
         empresa_id: empresa.id,
         status: "aberta",
         data_abertura: new Date().toISOString(),
-      });
+      })) as unknown as { id: string };
 
       // 2. Cadastrar os itens
       for (const item of itens) {
@@ -159,11 +163,12 @@ export default function CriarNovaOrdem() {
             onChange={(e) => setClienteId(e.target.value)}
             fullWidth
           >
-            {clientes.map((cliente) => (
-              <MenuItem key={cliente.id} value={cliente.id}>
-                {cliente.nome}
-              </MenuItem>
-            ))}
+            {clientes &&
+              clientes.map((cliente) => (
+                <MenuItem key={cliente.id} value={cliente.id}>
+                  {cliente.nome}
+                </MenuItem>
+              ))}
           </TextField>
         </Grid>
 
@@ -177,11 +182,12 @@ export default function CriarNovaOrdem() {
             fullWidth
             disabled={!clienteId}
           >
-            {motosFiltradas.map((moto) => (
-              <MenuItem key={moto.id} value={moto.id}>
-                {moto.marca}-{moto.modelo} - {moto.chassi}
-              </MenuItem>
-            ))}
+            {motosFiltradas &&
+              motosFiltradas.map((moto) => (
+                <MenuItem key={moto.id} value={moto.id}>
+                  {moto.marca}-{moto.modelo} - {moto.chassi}
+                </MenuItem>
+              ))}
           </TextField>
         </Grid>
 
@@ -213,11 +219,12 @@ export default function CriarNovaOrdem() {
                   fullWidth
                 >
                   <MenuItem value="manual">Produto Manual</MenuItem>
-                  {produtos.map((p) => (
-                    <MenuItem key={p.id} value={p.id}>
-                      {p.nome}
-                    </MenuItem>
-                  ))}
+                  {produtos &&
+                    produtos.map((p) => (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.nome}
+                      </MenuItem>
+                    ))}
                 </TextField>
               </Grid>
 

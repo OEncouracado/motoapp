@@ -1,7 +1,7 @@
 "use client";
 
 import { useApp } from "@/context/AppContext";
-import { Paper, Skeleton, Typography } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import { GridColDef, DataGrid } from "@mui/x-data-grid";
 import CachedIcon from "@mui/icons-material/Cached";
 import { ptBR } from "@mui/x-data-grid/locales";
@@ -47,7 +47,7 @@ export default function ListarOS() {
 
     for (const os of ordemsServico) {
       const itensLista = await buscarItensComProdutos(os.id);
-      const total = itensLista.reduce((soma, item) => {
+      const total = (itensLista ?? []).reduce((soma, item) => {
         const quantidade = item.quantidade ?? 0;
         const valor = item.produtos?.valor_venda ?? item.valor_unitario ?? 0;
         console.log("item.produtos.valor_venda :>> ", item);

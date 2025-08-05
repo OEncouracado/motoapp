@@ -33,6 +33,7 @@ type OpcaoPrincipal =
   | "clientes"
   | "motos"
   | "ordemsServico"
+  | "relatorios"
   | "estoque";
 type SubOpcao = "listar" | "nova";
 
@@ -132,22 +133,30 @@ export default function Dashboard() {
               {opcao === "home" && <div>Bem-vindo ao Dashboard</div>}
               {opcao === "clientes" && (
                 <MenuCliente
-                  ClienteMenuSelected={(op) => handleSetSubmenu("clientes", op)}
+                  ClienteMenuSelected={(op) =>
+                    handleSetSubmenu("clientes", op as SubOpcao)
+                  }
                 />
               )}
               {opcao === "motos" && (
                 <MenuMotos
-                  MotosMenuSelected={(op) => handleSetSubmenu("motos", op)}
+                  MotosMenuSelected={(op) =>
+                    handleSetSubmenu("motos", op as SubOpcao)
+                  }
                 />
               )}
               {opcao === "ordemsServico" && (
                 <MenuOS
-                  OsMenuSelected={(op) => handleSetSubmenu("ordemsServico", op)}
+                  OsMenuSelected={(op) =>
+                    handleSetSubmenu("ordemsServico", op as SubOpcao)
+                  }
                 />
               )}
               {opcao === "estoque" && (
                 <MenuEstoque
-                  EstoqueMenuSelected={(op) => handleSetSubmenu("estoque", op)}
+                  EstoqueMenuSelected={(op) =>
+                    handleSetSubmenu("estoque", op as SubOpcao)
+                  }
                 />
               )}
             </Item>
